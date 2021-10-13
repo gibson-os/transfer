@@ -1,0 +1,56 @@
+{
+    "name": "gibson-os/transfer",
+    "require": {
+        "php": " ^8.0",
+        "mdo/mdo": "dev-feature/php8.0",
+        "gibson-os/core": "dev-feature/php8.0",
+        "ext-mbstring": "*",
+        "ext-exif": "*",
+        "ext-sqlite3": "*",
+        "ext-json": "*",
+        "ext-iconv": "*"
+    },
+    "require-dev": {
+        "codeception/codeception": "^4.0",
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "phpmd/phpmd": "^2.7",
+        "captainhook/captainhook": "^5.0",
+        "captainhook/plugin-composer": "^5.0",
+        "codeception/module-asserts": "^1.3",
+        "vimeo/psalm": "^4.0",
+        "rector/rector": "^0.11.57",
+        "codeception/module-phpbrowser": "^1.0"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@wolli.dyndns.tv:/home/git/mdo.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@wolli.dyndns.tv:/home/git/gibsonOs/Core.git"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "GibsonOS\\Module\\Transfers\\": "src/"
+        }
+    },
+    "scripts": {
+        "fix": [
+            "@php-cs"
+        ],
+        "test": [
+            "@php-cs-dry",
+            "@php-psalm",
+            "@php-md",
+            "@php-unit"
+        ],
+        "php-cs": "php ./vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix src --verbose",
+        "php-cs-dry": "php ./vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix src --verbose --dry-run",
+        "php-psalm": "php ./vendor/vimeo/psalm/psalm",
+        "php-md": "php ./vendor/phpmd/phpmd/src/bin/phpmd src text ruleset.xml",
+        "php-unit": "php ./vendor/codeception/codeception/codecept run unit --ext DotReporter",
+        "php-unit-add": "php ./vendor/codeception/codeception/codecept generate:test unit"
+    }
+}

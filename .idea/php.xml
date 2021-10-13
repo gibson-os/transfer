@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpCodeSniffer">
+    <phpcs_settings>
+      <PhpCSConfiguration tool_path="C:\Users\Meins\Documents\Projekte\Itronom\phpcs.xml" />
+    </phpcs_settings>
+  </component>
+  <component name="PhpProjectSharedConfiguration" php_language_level="8.0" />
+</project>
