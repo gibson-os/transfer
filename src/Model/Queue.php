@@ -1,8 +1,12 @@
 <?php
 declare(strict_types=1);
 
+namespace GibsonOS\Module\Transfer\Model;
+
+use DateTimeInterface;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\User;
+use mysqlDatabase;
 
 class Queue extends AbstractModel
 {
