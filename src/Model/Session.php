@@ -15,7 +15,7 @@ class Session extends AbstractModel
 
     public function __construct(
         private string $name,
-        private string $url,
+        private string $address,
         private string $protocol,
         private int $port = 21,
         private ?string $remoteUser = null,
@@ -55,14 +55,14 @@ class Session extends AbstractModel
         return $this;
     }
 
-    public function getUrl(): string
+    public function getAddress(): string
     {
-        return $this->url;
+        return $this->address;
     }
 
-    public function setUrl(string $url): Session
+    public function setAddress(string $address): Session
     {
-        $this->url = $url;
+        $this->address = $address;
 
         return $this;
     }
