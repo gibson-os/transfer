@@ -21,18 +21,18 @@ class Session extends AbstractModel
         private ?string $remotePath = null,
         private ?string $data = null,
         private ?int $id = null,
-        mysqlDatabase $database = null,
         int $userId = null,
-        User $user = null
+        User $user = null,
+        mysqlDatabase $database = null
     ) {
         parent::__construct($database);
 
-        // @todo sowas wirst du öfter brauchen. Ab in die Abstract Model damit.
-        if ($user !== null) {
-            $this->setUser($user);
-        } elseif ($userId !== null) {
-            $this->setUserId($userId);
-        }
+        $this->setForeignValueByModelOrId(
+            $user,
+            $userId,
+            fn (?User $model) => $this->setUser($model),
+            fn (?int $id) => $this->setUserId($id)
+        );
     }
 
     public static function getTableName(): string

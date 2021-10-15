@@ -54,19 +54,19 @@ class Queue extends AbstractModel
     ) {
         parent::__construct($database);
 
-        // @todo sowas wirst du öfter brauchen. Ab in die Abstract Model damit.
-        if ($session !== null) {
-            $this->setSession($session);
-        } elseif ($sessionId !== null) {
-            $this->setSessionId($sessionId);
-        }
+        $this->setForeignValueByModelOrId(
+            $session,
+            $sessionId,
+            fn (?Session $model) => $this->setSession($model),
+            fn (?int $id) => $this->setSessionId($id)
+        );
 
-        // @todo sowas wirst du öfter brauchen. Ab in die Abstract Model damit.
-        if ($user !== null) {
-            $this->setUser($user);
-        } elseif ($userId !== null) {
-            $this->setUserId($userId);
-        }
+        $this->setForeignValueByModelOrId(
+            $user,
+            $userId,
+            fn (?User $model) => $this->setUser($model),
+            fn (?int $id) => $this->setUserId($id)
+        );
     }
 
     public static function getTableName(): string
