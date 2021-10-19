@@ -19,7 +19,16 @@ Ext.define('GibsonOS.module.transfer.session.Form', {
             name: 'name',
             fieldLabel: 'Name'
         },{
-            xtype: 'gosModuleTransferSessionProtocolComboBox',
+            xtype: 'gosModuleCoreParameterTypeAutoComplete',
+            name: 'client',
+            valueField: 'className',
+            parameterObject: {
+                config: {
+                    model: 'GibsonOS.module.transfer.session.model.Client',
+                    autoCompleteClassname: 'GibsonOS\\Module\\Transfer\\AutoComplete\\ClientAutoComplete',
+                    parameters: {}
+                }
+            },
             value: 'transfer'
         },{
             xtype: 'fieldcontainer',
@@ -144,7 +153,7 @@ Ext.define('GibsonOS.module.transfer.session.Form', {
 
         me.callParent();
 
-        me.down('gosModuleTransferSessionProtocolComboBox').on('change', function(combo, value) {
+        me.down('gosModuleCoreParameterTypeAutoComplete').on('change', function(combo, value) {
             var disable = false;
 
             if (value == 'amazondrive') {

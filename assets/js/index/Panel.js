@@ -286,19 +286,23 @@ Ext.define('GibsonOS.module.transfer.index.Panel', {
                 xtype: 'gosFormHidden',
                 itemId: 'transferIndexLocalPathField'
             },{
-                xtype: 'gosModuleTransferSessionProtocolComboBox',
+                xtype: 'gosModuleCoreParameterTypeAutoComplete',
+                name: 'client',
+                valueField: 'className',
+                parameterObject: {
+                    config: {
+                        model: 'GibsonOS.module.transfer.session.model.Client',
+                        autoCompleteClassname: 'GibsonOS\\Module\\Transfer\\AutoComplete\\ClientAutoComplete',
+                        parameters: {}
+                    }
+                },
                 itemId: 'transferIndexProtocolField',
                 hideLabel: true,
                 width: 70,
-                emptyText: 'Protokoll',
+                emptyText: 'Client',
                 enableKeyEvents: true,
                 listeners: {
-                    keyup: keyUpListener,
-                    afterrender: function(combo) {
-                        var store = combo.getStore();
-
-                        store.remove(store.getById('amazondrive'));
-                    }
+                    keyup: keyUpListener
                 }
             },{
                 xtype: 'gosFormTextfield',

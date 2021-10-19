@@ -15,7 +15,7 @@ use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Core\Service\SessionService;
 use GibsonOS\Core\Service\TwigService;
 use GibsonOS\Module\Transfer\Repository\SessionRepository;
-use GibsonOS\Module\Transfer\Service\TransferInterface;
+use GibsonOS\Module\Transfer\Service\ClientInterface;
 
 class IndexController extends AbstractController
 {
@@ -122,7 +122,7 @@ class IndexController extends AbstractController
      * @throws DateTimeError
      * @throws SelectError
      */
-    private function connect(): TransferInterface
+    private function connect(): ClientInterface
     {
         try {
             $session = $this->sessionRepository->getById($this->requestService->getRequestValue('id'));

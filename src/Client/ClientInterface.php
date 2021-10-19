@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace GibsonOS\Module\Transfer\Service;
+namespace GibsonOS\Module\Transfer\Client;
 
-interface TransferInterface
+interface ClientInterface
 {
     public function connect(string $address, string $user = null, string $password = null, int $port = null): void;
 
