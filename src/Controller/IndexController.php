@@ -33,7 +33,7 @@ class IndexController extends AbstractController
      * @throws LoginRequired
      * @throws PermissionDenied
      */
-    public function read(?string $dir = ''): AjaxResponse
+    public function read(string $dir = null): AjaxResponse
     {
         $this->checkPermission(PermissionService::READ);
 
@@ -44,7 +44,7 @@ class IndexController extends AbstractController
      * @throws LoginRequired
      * @throws PermissionDenied
      */
-    public function dirList(?string $node = ''): AjaxResponse
+    public function dirList(string $node = null): AjaxResponse
     {
         $this->checkPermission(PermissionService::READ);
 
@@ -58,7 +58,7 @@ class IndexController extends AbstractController
     public function download(
         string $localPath,
         string $dir,
-        ?array $files = null,
+        array $files = null,
         bool $overwrite = false,
         bool $ignore = false
     ): AjaxResponse {
