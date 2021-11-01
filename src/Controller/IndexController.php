@@ -8,7 +8,6 @@ use GibsonOS\Core\Controller\AbstractController;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Exception\RequestError;
 use GibsonOS\Core\Model\User\Permission;
-use GibsonOS\Core\Service\PermissionService;
 use GibsonOS\Core\Service\RequestService;
 use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Core\Service\SessionService;
@@ -20,12 +19,11 @@ class IndexController extends AbstractController
 {
     public function __construct(
         private SessionRepository $sessionRepository,
-        PermissionService $permissionService,
         RequestService $requestService,
         TwigService $twigService,
         SessionService $sessionService
     ) {
-        parent::__construct($permissionService, $requestService, $twigService, $sessionService);
+        parent::__construct($requestService, $twigService, $sessionService);
     }
 
     #[CheckPermission(Permission::READ)]
