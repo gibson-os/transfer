@@ -4,15 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d3eadf9576349330eb992e2e645a82ca",
+    "content-hash": "6eec64e028dcc52c1873fa0398c0d18a",
     "packages": [
         {
             "name": "gibson-os/core",
-            "version": "dev-feature/php8.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "git@wolli.dyndns.tv:/home/git/gibsonOs/Core.git",
-                "reference": "d7d064d1462608cff9f4ef91edb0684979596949"
+                "reference": "f900e2274b86dbc73d24d1db7cc102abf65a25a9"
             },
             "require": {
                 "ext-curl": "*",
@@ -24,7 +24,7 @@
                 "ext-sockets": "*",
                 "ext-sqlite3": "*",
                 "ext-zip": "*",
-                "mdo/mdo": "dev-feature/php8.0",
+                "mdo/mdo": "dev-master",
                 "php": " ^8.0",
                 "twig/twig": "^3.0"
             },
@@ -40,6 +40,7 @@
                 "rector/rector": "^0.11.57",
                 "vimeo/psalm": "^4.0"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -80,15 +81,15 @@
                     "php ./vendor/codeception/codeception/codecept generate:test unit"
                 ]
             },
-            "time": "2021-10-29T13:31:04+00:00"
+            "time": "2021-11-01T09:33:56+00:00"
         },
         {
             "name": "mdo/mdo",
-            "version": "dev-feature/php8.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "git@wolli.dyndns.tv:/home/git/mdo.git",
-                "reference": "8b6f70b7cd6ab061a6b4bf416dc430d64e79b5b3"
+                "reference": "38ae7657a07af899050ab449ad9dac300f634054"
             },
             "require": {
                 "ext-mbstring": "*",
@@ -105,6 +106,7 @@
                 "rector/rector": "^0.11.57",
                 "vimeo/psalm": "^4.0"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -143,7 +145,7 @@
                     "php ./vendor/codeception/codeception/codecept generate:test unit"
                 ]
             },
-            "time": "2021-10-29T13:29:10+00:00"
+            "time": "2021-10-31T22:54:50+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -2962,23 +2964,23 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "9.2.7",
+            "version": "9.2.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "d4c798ed8d51506800b441f7a13ecb0f76f12218"
+                "reference": "cf04e88a2e3c56fc1a65488afd493325b4c1bc3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/d4c798ed8d51506800b441f7a13ecb0f76f12218",
-                "reference": "d4c798ed8d51506800b441f7a13ecb0f76f12218",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/cf04e88a2e3c56fc1a65488afd493325b4c1bc3e",
+                "reference": "cf04e88a2e3c56fc1a65488afd493325b4c1bc3e",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-libxml": "*",
                 "ext-xmlwriter": "*",
-                "nikic/php-parser": "^4.12.0",
+                "nikic/php-parser": "^4.13.0",
                 "php": ">=7.3",
                 "phpunit/php-file-iterator": "^3.0.3",
                 "phpunit/php-text-template": "^2.0.2",
@@ -3027,7 +3029,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.7"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.8"
             },
             "funding": [
                 {
@@ -3035,7 +3037,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-09-17T05:39:03+00:00"
+            "time": "2021-10-30T08:01:38+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
