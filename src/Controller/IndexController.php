@@ -3,19 +3,18 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Controller;
 
+use GibsonOS\Core\Attribute\CheckPermission;
 use GibsonOS\Core\Controller\AbstractController;
-use GibsonOS\Core\Exception\DateTimeError;
-use GibsonOS\Core\Exception\LoginRequired;
-use GibsonOS\Core\Exception\PermissionDenied;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Exception\RequestError;
+use GibsonOS\Core\Model\User\Permission;
 use GibsonOS\Core\Service\PermissionService;
 use GibsonOS\Core\Service\RequestService;
 use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Core\Service\SessionService;
 use GibsonOS\Core\Service\TwigService;
+use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Repository\SessionRepository;
-use GibsonOS\Module\Transfer\Service\ClientInterface;
 
 class IndexController extends AbstractController
 {
@@ -29,32 +28,19 @@ class IndexController extends AbstractController
         parent::__construct($permissionService, $requestService, $twigService, $sessionService);
     }
 
-    /**
-     * @throws LoginRequired
-     * @throws PermissionDenied
-     */
+    #[CheckPermission(Permission::READ)]
     public function read(string $dir = null): AjaxResponse
     {
-        $this->checkPermission(PermissionService::READ);
-
         return $this->returnSuccess();
     }
 
-    /**
-     * @throws LoginRequired
-     * @throws PermissionDenied
-     */
+    #[CheckPermission(Permission::READ)]
     public function dirList(string $node = null): AjaxResponse
     {
-        $this->checkPermission(PermissionService::READ);
-
         return $this->returnSuccess();
     }
 
-    /**
-     * @throws LoginRequired
-     * @throws PermissionDenied
-     */
+    #[CheckPermission(Permission::READ)]
     public function download(
         string $localPath,
         string $dir,
@@ -62,15 +48,10 @@ class IndexController extends AbstractController
         bool $overwrite = false,
         bool $ignore = false
     ): AjaxResponse {
-        $this->checkPermission(PermissionService::READ);
-
         return $this->returnSuccess();
     }
 
-    /**
-     * @throws LoginRequired
-     * @throws PermissionDenied
-     */
+    #[CheckPermission(Permission::WRITE)]
     public function upload(
         string $remotePath,
         string $dir,
@@ -79,47 +60,29 @@ class IndexController extends AbstractController
         bool $ignore = false,
         bool $crypt = false
     ): AjaxResponse {
-        $this->checkPermission(PermissionService::WRITE);
-
         return $this->returnSuccess();
     }
 
-    /**
-     * @throws LoginRequired
-     * @throws PermissionDenied
-     */
+    #[CheckPermission(Permission::READ)]
     public function transfer(string $type, int $autoRefresh, int $limit = null, int $start = null): AjaxResponse
     {
-        $this->checkPermission(PermissionService::READ);
-
         return $this->returnSuccess();
     }
 
-    /**
-     * @throws LoginRequired
-     * @throws PermissionDenied
-     */
+    #[CheckPermission(Permission::WRITE)]
     public function addDir(string $dir, string $dirname, bool $crypt = false): AjaxResponse
     {
-        $this->checkPermission(PermissionService::WRITE);
-
         return $this->returnSuccess();
     }
 
-    /**
-     * @throws LoginRequired
-     * @throws PermissionDenied
-     */
+    #[CheckPermission(Permission::DELETE)]
     public function delete(string $dir, array $files = null): AjaxResponse
     {
-        $this->checkPermission(PermissionService::DELETE);
-
         return $this->returnSuccess();
     }
 
     /**
      * @throws RequestError
-     * @throws DateTimeError
      * @throws SelectError
      */
     private function connect(): ClientInterface
