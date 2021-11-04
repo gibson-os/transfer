@@ -9,7 +9,7 @@ use GibsonOS\Core\Repository\AbstractRepository;
 use GibsonOS\Module\Transfer\Model\Session;
 
 /**
- * @method Session fetchOne(string $where, array $parameters, string $abstractModelClassName = AbstractModel::class)
+ * @method Session fetchOne(string $where, array $parameters, string $modelClassName)
  */
 class SessionRepository extends AbstractRepository
 {
