@@ -19,7 +19,7 @@ class Client implements AutoCompleteModelInterface, JsonSerializable
 
     public function getName(): string
     {
-        return mb_substr($this->className, (mb_strrpos($this->className, '\\') ?: -1) + 1, -7);
+        return mb_substr($this->className, (mb_strrpos($this->className, '\\') ?: -1) + 1, -6);
     }
 
     public function getAutoCompleteId(): string
@@ -31,7 +31,7 @@ class Client implements AutoCompleteModelInterface, JsonSerializable
     {
         return [
             'className' => $this->getClassName(),
-            'title' => $this->getName(),
+            'name' => $this->getName(),
         ];
     }
 }

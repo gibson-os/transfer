@@ -30,6 +30,11 @@ class ClientAutoComplete implements AutoCompleteInterface
 
         foreach ($files as $file) {
             $className = str_replace('.php', '', $this->fileService->getFilename($file));
+
+            if (mb_strpos($className, 'Interface') !== false) {
+                continue;
+            }
+
             $clients[] = new Client($namespace . $className);
         }
 

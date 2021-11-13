@@ -25,7 +25,7 @@ Ext.define('GibsonOS.module.transfer.session.Form', {
             parameterObject: {
                 config: {
                     model: 'GibsonOS.module.transfer.session.model.Client',
-                    autoCompleteClassname: 'GibsonOS\\Module\\Transfer\\AutoComplete\\ClientAutoComplete',
+                    autoCompleteClassname: 'GibsonOS\\Module\\Transfer\\AutoComplete\\SessionAutoComplete',
                     parameters: {}
                 }
             },

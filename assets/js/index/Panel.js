@@ -289,6 +289,7 @@ Ext.define('GibsonOS.module.transfer.index.Panel', {
                 xtype: 'gosModuleCoreParameterTypeAutoComplete',
                 name: 'client',
                 valueField: 'className',
+                displayField: 'name',
                 parameterObject: {
                     config: {
                         model: 'GibsonOS.module.transfer.session.model.Client',

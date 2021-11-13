@@ -1,8 +1,10 @@
-Ext.define('GibsonOS.module.transfer.session.model.Transfer', {
+Ext.define('GibsonOS.module.transfer.session.model.Client', {
     extend: 'GibsonOS.data.Model',
     fields: [{
-        name: 'className'
+        name: 'className',
+        type: 'string'
     },{
-        name: 'title'
+        name: 'name',
+        type: 'string'
     }]
 });
