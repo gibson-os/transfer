@@ -13,6 +13,9 @@ class Session extends AbstractModel
 
     private ?User $user = null;
 
+    /**
+     * @param class-string $protocol
+     */
     public function __construct(
         private string $name,
         private string $address,
@@ -67,11 +70,17 @@ class Session extends AbstractModel
         return $this;
     }
 
+    /**
+     * @return class-string
+     */
     public function getProtocol(): string
     {
         return $this->protocol;
     }
 
+    /**
+     * @param class-string $protocol
+     */
     public function setProtocol(string $protocol): Session
     {
         $this->protocol = $protocol;

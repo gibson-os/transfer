@@ -5,15 +5,17 @@ namespace GibsonOS\Module\Transfer\Controller;
 
 use GibsonOS\Core\Attribute\CheckPermission;
 use GibsonOS\Core\Controller\AbstractController;
+use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\Repository\SelectError;
-use GibsonOS\Core\Exception\RequestError;
 use GibsonOS\Core\Model\User\Permission;
 use GibsonOS\Core\Service\RequestService;
 use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Core\Service\SessionService;
 use GibsonOS\Core\Service\TwigService;
-use GibsonOS\Module\Transfer\Client\ClientInterface;
+use GibsonOS\Module\Transfer\Exception\ClientException;
+use GibsonOS\Module\Transfer\Factory\ClientFactory;
 use GibsonOS\Module\Transfer\Repository\SessionRepository;
+use GibsonOS\Module\Transfer\Store\DirStore;
 
 class IndexController extends AbstractController
 {
@@ -26,15 +28,65 @@ class IndexController extends AbstractController
         parent::__construct($requestService, $twigService, $sessionService);
     }
 
+    /**
+     * @param class-string|null $protocol
+     *
+     * @throws SelectError
+     * @throws FactoryError
+     * @throws ClientException
+     */
     #[CheckPermission(Permission::READ)]
-    public function read(string $dir = null): AjaxResponse
-    {
-        return $this->returnSuccess();
+    public function read(
+        SessionRepository $sessionRepository,
+        ClientFactory $clientFactory,
+        DirStore $dirStore,
+        int $id = null,
+        string $protocol = null,
+        string $url = null,
+        int $port = null,
+        string $user = null,
+        string $password = null,
+        string $dir = null
+    ): AjaxResponse {
+        if ($id !== null) {
+            $session = $sessionRepository->getById($id);
+            $protocol = $session->getProtocol();
+            $url = $session->getAddress();
+            $port = $session->getPort();
+            $user = $session->getRemoteUser();
+            $password = $session->getRemotePassword();
+
+            if ($dir === null) {
+                $dir = $session->getRemotePath();
+            }
+        }
+
+        if ($protocol === null) {
+            return $this->returnFailure('Kein Protokoll angegeben');
+        }
+
+        $client = $clientFactory->get($protocol);
+        $client->connect($url ?? '', $user, $password, $port);
+        $dirStore
+            ->setClient($client)
+            ->setDir($dir ?? '')
+        ;
+        $list = $dirStore->getList();
+        $client->disconnect();
+
+        return $this->returnSuccess($list);
     }
 
     #[CheckPermission(Permission::READ)]
-    public function dirList(string $node = null): AjaxResponse
-    {
+    public function dirList(
+        int $id = null,
+        string $protocol = null,
+        string $url = null,
+        int $port = null,
+        string $user = null,
+        string $password = null,
+        string $node = null
+    ): AjaxResponse {
         return $this->returnSuccess();
     }
 
@@ -79,42 +131,42 @@ class IndexController extends AbstractController
         return $this->returnSuccess();
     }
 
-    /**
-     * @throws RequestError
-     * @throws SelectError
-     */
-    private function connect(): ClientInterface
-    {
-        try {
-            $session = $this->sessionRepository->getById($this->requestService->getRequestValue('id'));
-            $address = $session->getAddress();
-            $protocol = $session->getProtocol();
-            $port = $session->getPort();
-            $user = $session->getRemoteUser();
-            $password = $session->getRemotePassword();
-        } catch (RequestError) {
-            $address = $this->requestService->getRequestValue('address');
-            $protocol = $this->requestService->getRequestValue('protocol');
-
-            try {
-                $port = $this->requestService->getRequestValue('port');
-            } catch (RequestError) {
-                $port = null;
-            }
-
-            try {
-                $user = $this->requestService->getRequestValue('user');
-            } catch (RequestError) {
-                $user = null;
-            }
-
-            try {
-                $password = $this->requestService->getRequestValue('password');
-            } catch (RequestError) {
-                $password = null;
-            }
-        }
-
-        // @todo service holen. factory bauen
-    }
+//    /**
+//     * @throws RequestError
+//     * @throws SelectError
+//     */
+//    private function connect(): ClientInterface
+//    {
+//        try {
+//            $session = $this->sessionRepository->getById($this->requestService->getRequestValue('id'));
+//            $address = $session->getAddress();
+//            $protocol = $session->getProtocol();
+//            $port = $session->getPort();
+//            $user = $session->getRemoteUser();
+//            $password = $session->getRemotePassword();
+//        } catch (RequestError) {
+//            $address = $this->requestService->getRequestValue('address');
+//            $protocol = $this->requestService->getRequestValue('protocol');
+//
+//            try {
+//                $port = $this->requestService->getRequestValue('port');
+//            } catch (RequestError) {
+//                $port = null;
+//            }
+//
+//            try {
+//                $user = $this->requestService->getRequestValue('user');
+//            } catch (RequestError) {
+//                $user = null;
+//            }
+//
+//            try {
+//                $password = $this->requestService->getRequestValue('password');
+//            } catch (RequestError) {
+//                $password = null;
+//            }
+//        }
+//
+//        // @todo service holen. factory bauen
+//    }
 }
