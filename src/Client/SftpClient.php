@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Client;
 
+use GibsonOS\Core\Service\DateTimeService;
+use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 
 class SftpClient implements ClientInterface
@@ -16,6 +18,10 @@ class SftpClient implements ClientInterface
      * @var resource|null
      */
     private $sftpConnection;
+
+    public function __construct(private DateTimeService $dateTimeService)
+    {
+    }
 
     public function connect(string $address, string $user = null, string $password = null, int $port = null): void
     {
@@ -87,41 +93,123 @@ class SftpClient implements ClientInterface
 
     public function createDir(string $path): void
     {
-        // TODO: Implement createDir() method.
+        if ($this->sftpConnection === null) {
+            throw new ClientException('SSH2 not connected!');
+        }
+
+        if (!ssh2_sftp_mkdir($this->sftpConnection, $path)) {
+            throw new ClientException(sprintf('SSH2 directory %s could not be created!', $path));
+        }
     }
 
     public function get(string $remotePath, string $localPath): void
     {
-        // TODO: Implement get() method.
+        if ($this->connection === null) {
+            throw new ClientException('SSH2 not connected!');
+        }
+
+        if (!ssh2_scp_recv($this->connection, $remotePath, $localPath)) {
+            throw new ClientException(sprintf('SSH2 file %s could not be saved on %s!', $remotePath, $localPath));
+        }
     }
 
     public function put(string $localPath, string $remotePath): void
     {
-        // TODO: Implement put() method.
+        if ($this->connection === null) {
+            throw new ClientException('SSH2 not connected!');
+        }
+
+        if (!ssh2_scp_send($this->connection, $remotePath, $localPath)) {
+            throw new ClientException(sprintf('SSH2 file %s could not be saved on %s!', $localPath, $remotePath));
+        }
     }
 
     public function isDir(string $path): bool
     {
-        return false;
+        if ($this->sftpConnection === null) {
+            throw new ClientException('SSH2 not connected!');
+        }
+
+        return is_dir($this->getSftpProtocolString() . $path);
     }
 
     public function fileExists(string $path): bool
     {
-        return false;
+        if ($this->sftpConnection === null) {
+            throw new ClientException('SSH2 not connected!');
+        }
+
+        return file_exists($this->getSftpProtocolString() . $path);
     }
 
     public function fileSize(string $path): int
     {
-        return 0;
+        if ($this->sftpConnection === null) {
+            throw new ClientException('SSH2 not connected!');
+        }
+
+        return filesize($this->getSftpProtocolString() . $path);
     }
 
     public function getList(string $dir): array
     {
-        return [];
+        if ($this->sftpConnection === null) {
+            throw new ClientException('SSH2 not connected!');
+        }
+
+        $dirResource = opendir($this->getSftpProtocolString() . $dir);
+
+        if (!is_resource($dirResource)) {
+            throw new ClientException(sprintf('Directory %s could not be opened!', $dir));
+        }
+
+        $list = [];
+
+        while ($item = readdir($dirResource)) {
+            if (
+                $item == '.' ||
+                $item == '..'
+            ) {
+                continue;
+            }
+
+            $stats = ssh2_sftp_stat($this->sftpConnection, $dir . $item);
+            $permissions = $stats['mode'];
+
+            $list[] = new ListItem(
+                $item,
+                $dir,
+                $this->dateTimeService->get('@' . $stats['mtime']),
+                $stats['size'],
+                $this->isDir($dir . $item),
+                new ListItem\Permission(
+                    (bool) ($permissions & 0x0100),
+                    (bool) ($permissions & 0x0080),
+                    ($permissions & 0x0040) && !($permissions & 0x0800),
+                    $permissions['uid']
+                ),
+                new ListItem\Permission(
+                    (bool) ($permissions & 0x0020),
+                    (bool) ($permissions & 0x0010),
+                    ($permissions & 0x0008) && !($permissions & 0x0400),
+                    $permissions['gid']
+                ),
+                new ListItem\Permission(
+                    (bool) ($permissions & 0x0004),
+                    (bool) ($permissions & 0x0002),
+                    ($permissions & 0x0001) && !($permissions & 0x0200),
+                )
+            );
+        }
+
+        return $list;
     }
 
-    public function openDir(string $dir): void
+    private function getSftpProtocolString(): string
     {
-        // TODO: Implement openDir() method.
+        /**
+         * @psalm-suppress InvalidOperand
+         */
+        return 'ssh2.sftp://' . $this->sftpConnection;
     }
 }

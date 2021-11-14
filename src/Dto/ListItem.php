@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Transfer\Dto;
 
 use DateTimeInterface;
+use GibsonOS\Module\Transfer\Dto\ListItem\Permission;
 
 class ListItem implements \JsonSerializable
 {
@@ -12,7 +13,10 @@ class ListItem implements \JsonSerializable
         private string $dir,
         private DateTimeInterface $modified,
         private int $size,
-        private bool $isDir
+        private bool $isDir,
+        private ?Permission $user = null,
+        private ?Permission $group = null,
+        private ?Permission $other = null,
     ) {
     }
 
