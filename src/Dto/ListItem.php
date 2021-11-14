@@ -5,8 +5,9 @@ namespace GibsonOS\Module\Transfer\Dto;
 
 use DateTimeInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem\Permission;
+use JsonSerializable;
 
-class ListItem implements \JsonSerializable
+class ListItem implements JsonSerializable
 {
     public function __construct(
         private string $name,
@@ -14,7 +15,7 @@ class ListItem implements \JsonSerializable
         private DateTimeInterface $modified,
         private int $size,
         private bool $isDir,
-        private ?Permission $user = null,
+        private ?Permission $owner = null,
         private ?Permission $group = null,
         private ?Permission $other = null,
     ) {
@@ -45,6 +46,21 @@ class ListItem implements \JsonSerializable
         return $this->isDir;
     }
 
+    public function getOwner(): ?Permission
+    {
+        return $this->owner;
+    }
+
+    public function getGroup(): ?Permission
+    {
+        return $this->group;
+    }
+
+    public function getOther(): ?Permission
+    {
+        return $this->other;
+    }
+
     public function jsonSerialize(): array
     {
         return [
@@ -53,6 +69,9 @@ class ListItem implements \JsonSerializable
             'size' => $this->getSize(),
             'modified' => $this->getModified()->format('Y-m-d H:i:s'),
             'isDir' => $this->isDir(),
+            'owner' => $this->getOwner()->jsonSerialize(),
+            'group' => $this->getGroup()->jsonSerialize(),
+            'other' => $this->getOther()->jsonSerialize(),
         ];
     }
 }

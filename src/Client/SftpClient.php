@@ -30,7 +30,7 @@ class SftpClient implements ClientInterface
         }
 
         if ($port === null) {
-            $port = 21;
+            $port = 22;
         }
 
         $connection = ssh2_connect($address, $port);
@@ -157,6 +157,10 @@ class SftpClient implements ClientInterface
             throw new ClientException('SSH2 not connected!');
         }
 
+        if (empty($dir)) {
+            $dir = '/';
+        }
+
         $dirResource = opendir($this->getSftpProtocolString() . $dir);
 
         if (!is_resource($dirResource)) {
@@ -174,7 +178,7 @@ class SftpClient implements ClientInterface
             }
 
             $stats = ssh2_sftp_stat($this->sftpConnection, $dir . $item);
-            $permissions = $stats['mode'];
+            $mode = $stats['mode'];
 
             $list[] = new ListItem(
                 $item,
@@ -183,21 +187,21 @@ class SftpClient implements ClientInterface
                 $stats['size'],
                 $this->isDir($dir . $item),
                 new ListItem\Permission(
-                    (bool) ($permissions & 0x0100),
-                    (bool) ($permissions & 0x0080),
-                    ($permissions & 0x0040) && !($permissions & 0x0800),
-                    $permissions['uid']
+                    (bool) ($mode & 0x0100),
+                    (bool) ($mode & 0x0080),
+                    ($mode & 0x0040) && !($mode & 0x0800),
+                    (string) $stats['uid']
                 ),
                 new ListItem\Permission(
-                    (bool) ($permissions & 0x0020),
-                    (bool) ($permissions & 0x0010),
-                    ($permissions & 0x0008) && !($permissions & 0x0400),
-                    $permissions['gid']
+                    (bool) ($mode & 0x0020),
+                    (bool) ($mode & 0x0010),
+                    ($mode & 0x0008) && !($mode & 0x0400),
+                    (string) $stats['gid']
                 ),
                 new ListItem\Permission(
-                    (bool) ($permissions & 0x0004),
-                    (bool) ($permissions & 0x0002),
-                    ($permissions & 0x0001) && !($permissions & 0x0200),
+                    (bool) ($mode & 0x0004),
+                    (bool) ($mode & 0x0002),
+                    ($mode & 0x0001) && !($mode & 0x0200),
                 )
             );
         }

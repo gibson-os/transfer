@@ -12,11 +12,10 @@ class Permission implements JsonSerializable
         private bool $write,
         private bool $execute,
         private ?string $name = null
-    )
-    {
+    ) {
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
