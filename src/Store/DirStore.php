@@ -5,6 +5,8 @@ namespace GibsonOS\Module\Transfer\Store;
 
 use GibsonOS\Core\Store\AbstractStore;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
+use GibsonOS\Module\Transfer\Dto\ListItem;
+use GibsonOS\Module\Transfer\Exception\ClientException;
 
 class DirStore extends AbstractStore
 {
@@ -12,6 +14,11 @@ class DirStore extends AbstractStore
 
     private string $dir;
 
+    /**
+     * @throws ClientException
+     *
+     * @return ListItem[]
+     */
     public function getList(): iterable
     {
         return $this->client->getList($this->dir);

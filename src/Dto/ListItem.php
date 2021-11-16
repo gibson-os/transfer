@@ -11,10 +11,11 @@ class ListItem implements JsonSerializable
 {
     public function __construct(
         private string $name,
+        private string $decryptedName,
         private string $dir,
         private DateTimeInterface $modified,
         private int $size,
-        private bool $isDir,
+        private string $type,
         private ?Permission $owner = null,
         private ?Permission $group = null,
         private ?Permission $other = null,
@@ -24,6 +25,11 @@ class ListItem implements JsonSerializable
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getDecryptedName(): string
+    {
+        return $this->decryptedName;
     }
 
     public function getDir(): string
@@ -41,9 +47,9 @@ class ListItem implements JsonSerializable
         return $this->size;
     }
 
-    public function isDir(): bool
+    public function getType(): string
     {
-        return $this->isDir;
+        return $this->type;
     }
 
     public function getOwner(): ?Permission
@@ -65,10 +71,11 @@ class ListItem implements JsonSerializable
     {
         return [
             'name' => $this->getName(),
+            'decryptedName' => $this->getDecryptedName(),
             'dir' => $this->getDir(),
             'size' => $this->getSize(),
             'modified' => $this->getModified()->format('Y-m-d H:i:s'),
-            'isDir' => $this->isDir(),
+            'type' => $this->getType(),
             'owner' => $this->getOwner()->jsonSerialize(),
             'group' => $this->getGroup()->jsonSerialize(),
             'other' => $this->getOther()->jsonSerialize(),

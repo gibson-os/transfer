@@ -15,6 +15,7 @@ use GibsonOS\Core\Service\TwigService;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 use GibsonOS\Module\Transfer\Factory\ClientFactory;
 use GibsonOS\Module\Transfer\Repository\SessionRepository;
+use GibsonOS\Module\Transfer\Service\ClientService;
 use GibsonOS\Module\Transfer\Store\DirStore;
 
 class IndexController extends AbstractController
@@ -40,6 +41,7 @@ class IndexController extends AbstractController
         SessionRepository $sessionRepository,
         ClientFactory $clientFactory,
         DirStore $dirStore,
+        ClientService $clientService,
         int $id = null,
         string $protocol = null,
         string $url = null,
@@ -65,6 +67,13 @@ class IndexController extends AbstractController
             return $this->returnFailure('Kein Protokoll angegeben');
         }
 
+        $encryptedPath = explode('/', $dir === null ? '' : mb_substr($dir, 0, -1));
+        $decryptedPath = [];
+
+        foreach ($encryptedPath as $item) {
+            $decryptedPath[] = $clientService->decryptDirName($item);
+        }
+
         $client = $clientFactory->get($protocol);
         $client->connect($url ?? '', $user, $password, $port);
         $dirStore
@@ -74,7 +83,32 @@ class IndexController extends AbstractController
         $list = $dirStore->getList();
         $client->disconnect();
 
-        return $this->returnSuccess($list);
+        $metas = [
+            'dirCount' => 0,
+            'fileCount' => 0,
+            'fileSize' => 0,
+        ];
+
+        foreach ($list as $item) {
+            if ($item->getType() === 'dir') {
+                ++$metas['dirCount'];
+
+                continue;
+            }
+
+            ++$metas['fileCount'];
+            $metas['fileSize'] += $item->getSize();
+        }
+
+        return new AjaxResponse([
+            'success' => true,
+            'failure' => false,
+            'data' => $list,
+            'path' => $encryptedPath,
+            'decryptedPath' => $decryptedPath,
+            'metas' => $metas,
+            'dir' => $dir ?? '/',
+        ]);
     }
 
     #[CheckPermission(Permission::READ)]

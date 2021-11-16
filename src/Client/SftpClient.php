@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Transfer\Client;
 
 use GibsonOS\Core\Service\DateTimeService;
+use GibsonOS\Core\Service\FileService;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 
@@ -19,7 +20,7 @@ class SftpClient implements ClientInterface
      */
     private $sftpConnection;
 
-    public function __construct(private DateTimeService $dateTimeService)
+    public function __construct(private DateTimeService $dateTimeService, private FileService $fileService)
     {
     }
 
@@ -182,10 +183,11 @@ class SftpClient implements ClientInterface
 
             $list[] = new ListItem(
                 $item,
+                $item, // @todo crypt einbauen
                 $dir,
                 $this->dateTimeService->get('@' . $stats['mtime']),
                 $stats['size'],
-                $this->isDir($dir . $item),
+                $this->isDir($dir . $item) ? 'dir' : $this->fileService->getFileEnding($item),
                 new ListItem\Permission(
                     (bool) ($mode & 0x0100),
                     (bool) ($mode & 0x0080),
@@ -205,6 +207,8 @@ class SftpClient implements ClientInterface
                 )
             );
         }
+
+        closedir($dirResource);
 
         return $list;
     }

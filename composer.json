@@ -9,7 +9,8 @@
         "ext-sqlite3": "*",
         "ext-json": "*",
         "ext-iconv": "*",
-        "ext-ssh2": "*"
+        "ext-ssh2": "*",
+        "ext-zlib": "*"
     },
     "require-dev": {
         "codeception/codeception": "^4.0",
