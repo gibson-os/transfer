@@ -7,12 +7,17 @@ use GibsonOS\Core\Store\AbstractStore;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
+use GibsonOS\Module\Transfer\Service\ClientService;
 
 class DirStore extends AbstractStore
 {
     private ClientInterface $client;
 
     private string $dir;
+
+    public function __construct(private ClientService $clientService)
+    {
+    }
 
     /**
      * @throws ClientException
@@ -21,7 +26,7 @@ class DirStore extends AbstractStore
      */
     public function getList(): iterable
     {
-        return $this->client->getList($this->dir);
+        return $this->clientService->getList($this->client, $this->dir, true);
     }
 
     public function getCount(): int

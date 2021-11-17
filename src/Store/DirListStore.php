@@ -3,25 +3,53 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Store;
 
+use Generator;
 use GibsonOS\Core\Store\AbstractStore;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Exception\ClientException;
+use GibsonOS\Module\Transfer\Service\ClientService;
 
 class DirListStore extends AbstractStore
 {
     private ClientInterface $client;
 
-    private string $dir = 'root';
+    private string $dir = '/';
+
+    private bool $loadParents = false;
+
+    public function __construct(private ClientService $clientService)
+    {
+    }
 
     /**
      * @throws ClientException
      */
     public function getList(): iterable
     {
-        $list = $this->getDirs($this->dir);
+        $list = [...$this->getDirs($this->dir)];
 
-        if ($this->dir === 'root' || empty($this->dir)) {
-            // Load parents
+        if ($this->loadParents) {
+            $childDir = $this->dir;
+            $dirs = explode('/', $this->dir);
+            unset($dirs[count($dirs) - 1]);
+
+            for ($i = count($dirs) - 1; $i >= 0; --$i) {
+                $parentList = [];
+                $parentDir = implode('/', $dirs) . '/';
+
+                foreach ($this->getDirs($parentDir) as $dir) {
+                    if ($childDir === $parentDir . $dir['encryptedName'] . '/') {
+                        $dir['data'] = $list;
+                        $dir['expanded'] = true;
+                    }
+
+                    $parentList[] = $dir;
+                }
+
+                $list = $parentList;
+                $childDir = $parentDir;
+                unset($dirs[count($dirs) - 1]);
+            }
         }
 
         return $list;
@@ -46,21 +74,25 @@ class DirListStore extends AbstractStore
         return $this;
     }
 
+    public function setLoadParents(bool $loadParents): DirListStore
+    {
+        $this->loadParents = $loadParents;
+
+        return $this;
+    }
+
     /**
      * @throws ClientException
      */
-    private function getDirs(string $dir): array
+    private function getDirs(string $dir): Generator
     {
-        $dirs = [];
-
-        foreach ($this->client->getList($this->dir) as $item) {
-            if ($item->getType() !== 'dir') {
-                continue;
-            }
-
-            $dirs[] = $item;
+        foreach ($this->clientService->getList($this->client, $dir, false) as $item) {
+            yield [
+                'text' => $item->getDecryptedName(),
+                'encryptedName' => $item->getName(),
+                'id' => $dir . $item->getName() . '/',
+                'iconCls' => 'icon16 icon_dir',
+            ];
         }
-
-        return $dirs;
     }
 }

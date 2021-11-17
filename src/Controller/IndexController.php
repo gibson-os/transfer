@@ -6,22 +6,25 @@ namespace GibsonOS\Module\Transfer\Controller;
 use GibsonOS\Core\Attribute\CheckPermission;
 use GibsonOS\Core\Controller\AbstractController;
 use GibsonOS\Core\Exception\FactoryError;
-use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Model\User\Permission;
 use GibsonOS\Core\Service\RequestService;
 use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Core\Service\SessionService;
 use GibsonOS\Core\Service\TwigService;
+use GibsonOS\Module\Transfer\Client\ClientInterface;
+use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 use GibsonOS\Module\Transfer\Factory\ClientFactory;
 use GibsonOS\Module\Transfer\Repository\SessionRepository;
 use GibsonOS\Module\Transfer\Service\ClientService;
+use GibsonOS\Module\Transfer\Store\DirListStore;
 use GibsonOS\Module\Transfer\Store\DirStore;
 
 class IndexController extends AbstractController
 {
     public function __construct(
         private SessionRepository $sessionRepository,
+        private ClientFactory $clientFactory,
         RequestService $requestService,
         TwigService $twigService,
         SessionService $sessionService
@@ -32,14 +35,11 @@ class IndexController extends AbstractController
     /**
      * @param class-string|null $protocol
      *
-     * @throws SelectError
      * @throws FactoryError
      * @throws ClientException
      */
     #[CheckPermission(Permission::READ)]
     public function read(
-        SessionRepository $sessionRepository,
-        ClientFactory $clientFactory,
         DirStore $dirStore,
         ClientService $clientService,
         int $id = null,
@@ -50,22 +50,7 @@ class IndexController extends AbstractController
         string $password = null,
         string $dir = null
     ): AjaxResponse {
-        if ($id !== null) {
-            $session = $sessionRepository->getById($id);
-            $protocol = $session->getProtocol();
-            $url = $session->getAddress();
-            $port = $session->getPort();
-            $user = $session->getRemoteUser();
-            $password = $session->getRemotePassword();
-
-            if ($dir === null) {
-                $dir = $session->getRemotePath();
-            }
-        }
-
-        if ($protocol === null) {
-            return $this->returnFailure('Kein Protokoll angegeben');
-        }
+        $client = $this->connect($id, $protocol, $url, $port, $user, $password);
 
         $encryptedPath = explode('/', $dir === null ? '' : mb_substr($dir, 0, -1));
         $decryptedPath = [];
@@ -74,8 +59,6 @@ class IndexController extends AbstractController
             $decryptedPath[] = $clientService->decryptDirName($item);
         }
 
-        $client = $clientFactory->get($protocol);
-        $client->connect($url ?? '', $user, $password, $port);
         $dirStore
             ->setClient($client)
             ->setDir($dir ?? '')
@@ -90,7 +73,7 @@ class IndexController extends AbstractController
         ];
 
         foreach ($list as $item) {
-            if ($item->getType() === 'dir') {
+            if ($item->getType() === ListItem::TYPE_DIR) {
                 ++$metas['dirCount'];
 
                 continue;
@@ -111,17 +94,40 @@ class IndexController extends AbstractController
         ]);
     }
 
+    /**
+     * @param class-string|null $protocol
+     *
+     * @throws ClientException
+     * @throws FactoryError
+     */
     #[CheckPermission(Permission::READ)]
     public function dirList(
+        DirListStore $dirListStore,
         int $id = null,
         string $protocol = null,
         string $url = null,
         int $port = null,
         string $user = null,
         string $password = null,
+        string $dir = null,
         string $node = null
     ): AjaxResponse {
-        return $this->returnSuccess();
+        $client = $this->connect($id, $protocol, $url, $port, $user, $password);
+        $loadParents = false;
+
+        if ($node === 'root') {
+            $loadParents = true;
+        } elseif (!empty($node)) {
+            $dir = $node;
+        }
+
+        $dirListStore
+            ->setClient($client)
+            ->setDir($dir ?? '/')
+            ->setLoadParents($loadParents)
+        ;
+
+        return $this->returnSuccess($dirListStore->getList());
     }
 
     #[CheckPermission(Permission::READ)]
@@ -165,42 +171,36 @@ class IndexController extends AbstractController
         return $this->returnSuccess();
     }
 
-//    /**
-//     * @throws RequestError
-//     * @throws SelectError
-//     */
-//    private function connect(): ClientInterface
-//    {
-//        try {
-//            $session = $this->sessionRepository->getById($this->requestService->getRequestValue('id'));
-//            $address = $session->getAddress();
-//            $protocol = $session->getProtocol();
-//            $port = $session->getPort();
-//            $user = $session->getRemoteUser();
-//            $password = $session->getRemotePassword();
-//        } catch (RequestError) {
-//            $address = $this->requestService->getRequestValue('address');
-//            $protocol = $this->requestService->getRequestValue('protocol');
-//
-//            try {
-//                $port = $this->requestService->getRequestValue('port');
-//            } catch (RequestError) {
-//                $port = null;
-//            }
-//
-//            try {
-//                $user = $this->requestService->getRequestValue('user');
-//            } catch (RequestError) {
-//                $user = null;
-//            }
-//
-//            try {
-//                $password = $this->requestService->getRequestValue('password');
-//            } catch (RequestError) {
-//                $password = null;
-//            }
-//        }
-//
-//        // @todo service holen. factory bauen
-//    }
+    /**
+     * @param class-string|null $protocol
+     *
+     * @throws ClientException
+     * @throws FactoryError
+     */
+    private function connect(
+        int $id = null,
+        string $protocol = null,
+        string $address = null,
+        int $port = null,
+        string $user = null,
+        string $password = null
+    ): ClientInterface {
+        if ($id !== null) {
+            $session = $this->sessionRepository->getById($id);
+            $protocol = $session->getProtocol();
+            $address = $session->getAddress();
+            $port = $session->getPort();
+            $user = $session->getRemoteUser();
+            $password = $session->getRemotePassword();
+        }
+
+        if ($protocol === null) {
+            throw new ClientException('No protocol set!');
+        }
+
+        $client = $this->clientFactory->get($protocol);
+        $client->connect($address ?? '', $user, $password, $port);
+
+        return $client;
+    }
 }

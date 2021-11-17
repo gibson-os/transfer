@@ -9,6 +9,8 @@ use JsonSerializable;
 
 class ListItem implements JsonSerializable
 {
+    public const TYPE_DIR = 'dir';
+
     public function __construct(
         private string $name,
         private string $decryptedName,

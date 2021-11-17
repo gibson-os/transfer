@@ -181,13 +181,13 @@ class SftpClient implements ClientInterface
             $stats = ssh2_sftp_stat($this->sftpConnection, $dir . $item);
             $mode = $stats['mode'];
 
-            $list[] = new ListItem(
+            $list[$item] = new ListItem(
                 $item,
                 $item, // @todo crypt einbauen
                 $dir,
                 $this->dateTimeService->get('@' . $stats['mtime']),
                 $stats['size'],
-                $this->isDir($dir . $item) ? 'dir' : $this->fileService->getFileEnding($item),
+                $this->isDir($dir . $item) ? ListItem::TYPE_DIR : $this->fileService->getFileEnding($item),
                 new ListItem\Permission(
                     (bool) ($mode & 0x0100),
                     (bool) ($mode & 0x0080),
@@ -209,8 +209,9 @@ class SftpClient implements ClientInterface
         }
 
         closedir($dirResource);
+        ksort($list);
 
-        return $list;
+        return array_values($list);
     }
 
     private function getSftpProtocolString(): string
