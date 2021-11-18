@@ -69,6 +69,8 @@ class ClientService
      */
     public function delete(ClientInterface $client, string $dir, array $files = null): void
     {
+        $dir = $this->dirService->addEndSlash($dir, '/');
+
         foreach ($client->getList($dir) as $item) {
             if ($files !== null && !in_array($item->getName(), $files)) {
                 continue;

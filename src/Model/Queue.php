@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Model;
 
+use DateTimeImmutable;
 use DateTimeInterface;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\User;
 use mysqlDatabase;
 
-class Queue extends AbstractModel
+class Queue extends AbstractModel implements \JsonSerializable
 {
     public const STATUS_ERROR = 'error';
 
@@ -22,6 +23,44 @@ class Queue extends AbstractModel
 
     public const DIRECTION_UPLOAD = 'upload';
 
+    private ?int $id = null;
+
+    private string $localPath;
+
+    private string $remotePath;
+
+    private int $size = 0;
+
+    private int $transferred = 0;
+
+    private string $status = self::STATUS_WAIT;
+
+    private string $direction = self::DIRECTION_DOWNLOAD;
+
+    private bool $overwrite = false;
+
+    private bool $crypt = false;
+
+    private ?string $url = null;
+
+    private ?int $port = null;
+
+    private ?string $protocol = null;
+
+    private ?string $remoteUser = null;
+
+    private ?string $remotePassword = null;
+
+    private ?string $message = null;
+
+    private ?DateTimeInterface $cryptDate = null;
+
+    private ?DateTimeInterface $start = null;
+
+    private ?DateTimeInterface $end = null;
+
+    private DateTimeInterface $added;
+
     private ?int $sessionId = null;
 
     private ?Session $session = null;
@@ -30,47 +69,11 @@ class Queue extends AbstractModel
 
     private ?User $user = null;
 
-    public function __construct(
-        private string $localPath,
-        private string $remotePath,
-        private int $size,
-        private int $transferred,
-        private string $status = self::STATUS_WAIT,
-        private string $direction = self::DIRECTION_DOWNLOAD,
-        private bool $overwrite = false,
-        private bool $crypt = false,
-        private ?string $url = null,
-        private ?int $port = null,
-        private ?string $protocol = null,
-        private ?string $remoteUser = null,
-        private ?string $remotePassword = null,
-        private ?string $message = null,
-        private ?DateTimeInterface $cryptDate = null,
-        private ?DateTimeInterface $start = null,
-        private ?DateTimeInterface $end = null,
-        private ?DateTimeInterface $added = null,
-        private ?int $id = null,
-        int $sessionId = null,
-        Session $session = null,
-        int $userId = null,
-        User $user = null,
-        mysqlDatabase $database = null
-    ) {
+    public function __construct(mysqlDatabase $database = null)
+    {
         parent::__construct($database);
 
-        $this->setForeignValueByModelOrId(
-            $session,
-            $sessionId,
-            fn (?Session $model) => $this->setSession($model),
-            fn (?int $id) => $this->setSessionId($id)
-        );
-
-        $this->setForeignValueByModelOrId(
-            $user,
-            $userId,
-            fn (?User $model) => $this->setUser($model),
-            fn (?int $id) => $this->setUserId($id)
-        );
+        $this->added = new DateTimeImmutable();
     }
 
     public static function getTableName(): string
@@ -352,5 +355,28 @@ class Queue extends AbstractModel
         $this->user = $user;
 
         return $this;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'localPath' => $this->getLocalPath(),
+            'remotePath' => $this->getRemotePath(),
+            'size' => $this->getSize(),
+            'transferred' => $this->getTransferred(),
+            'status' => $this->getStatus(),
+            'direction' => $this->getDirection(),
+            'overwrite' => $this->isOverwrite(),
+            'crypt' => $this->isCrypt(),
+            'url' => $this->getUrl(),
+            'port' => $this->getPort(),
+            'protocol' => $this->getProtocol(),
+            'message' => $this->getMessage(),
+            'userId' => $this->getUserId(),
+            'added' => $this->added?->format('Y-m-d H:i:s'),
+            'start' => $this->start?->format('Y-m-d H:i:s'),
+            'end' => $this->end?->format('Y-m-d H:i:s'),
+            'cryptDate' => $this->cryptDate?->format('Y-m-d H:i:s'),
+        ];
     }
 }

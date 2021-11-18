@@ -6,6 +6,7 @@ namespace GibsonOS\Module\Transfer\Controller;
 use GibsonOS\Core\Attribute\CheckPermission;
 use GibsonOS\Core\Controller\AbstractController;
 use GibsonOS\Core\Exception\FactoryError;
+use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Model\User\Permission;
 use GibsonOS\Core\Service\RequestService;
 use GibsonOS\Core\Service\Response\AjaxResponse;
@@ -17,8 +18,10 @@ use GibsonOS\Module\Transfer\Exception\ClientException;
 use GibsonOS\Module\Transfer\Factory\ClientFactory;
 use GibsonOS\Module\Transfer\Repository\SessionRepository;
 use GibsonOS\Module\Transfer\Service\ClientService;
+use GibsonOS\Module\Transfer\Service\QueueService;
 use GibsonOS\Module\Transfer\Store\DirListStore;
 use GibsonOS\Module\Transfer\Store\DirStore;
+use GibsonOS\Module\Transfer\Store\TransferStore;
 
 class IndexController extends AbstractController
 {
@@ -37,6 +40,7 @@ class IndexController extends AbstractController
      *
      * @throws FactoryError
      * @throws ClientException
+     * @throws SelectError
      */
     #[CheckPermission(Permission::READ)]
     public function read(
@@ -99,6 +103,7 @@ class IndexController extends AbstractController
      *
      * @throws ClientException
      * @throws FactoryError
+     * @throws SelectError
      */
     #[CheckPermission(Permission::READ)]
     public function dirList(
@@ -132,14 +137,44 @@ class IndexController extends AbstractController
         return $this->returnSuccess($list);
     }
 
+    /**
+     * @param class-string|null $protocol
+     *
+     * @throws ClientException
+     * @throws FactoryError
+     * @throws SelectError
+     */
     #[CheckPermission(Permission::READ)]
     public function download(
+        QueueService $queueService,
         string $localPath,
         string $dir,
         array $files = null,
         bool $overwrite = false,
-        bool $ignore = false
+        bool $ignore = false,
+        int $id = null,
+        string $protocol = null,
+        string $url = null,
+        int $port = null,
+        string $user = null,
+        string $password = null
     ): AjaxResponse {
+        $client = $this->connect($id, $protocol, $url, $port, $user, $password);
+        $queueService->addDownload(
+            $client,
+            $localPath,
+            $dir,
+            $files,
+            $overwrite,
+            $ignore,
+            $id,
+            $protocol,
+            $url,
+            $port,
+            $user,
+            $password
+        );
+
         return $this->returnSuccess();
     }
 
@@ -155,10 +190,23 @@ class IndexController extends AbstractController
         return $this->returnSuccess();
     }
 
+    /**
+     * @throws SelectError
+     */
     #[CheckPermission(Permission::READ)]
-    public function transfer(string $type, int $autoRefresh, int $limit = null, int $start = null): AjaxResponse
-    {
-        return $this->returnSuccess();
+    public function transfer(
+        TransferStore $transferStore,
+        string $type,
+        int $autoRefresh,
+        int $limit = 0,
+        int $start = 0
+    ): AjaxResponse {
+        $transferStore
+            ->setType($type)
+            ->setLimit($limit, $start)
+        ;
+
+        return $this->returnSuccess($transferStore->getList(), $transferStore->getCount());
     }
 
     /**
@@ -166,6 +214,7 @@ class IndexController extends AbstractController
      *
      * @throws ClientException
      * @throws FactoryError
+     * @throws SelectError
      */
     #[CheckPermission(Permission::WRITE)]
     public function addDir(
@@ -192,6 +241,7 @@ class IndexController extends AbstractController
      *
      * @throws ClientException
      * @throws FactoryError
+     * @throws SelectError
      */
     #[CheckPermission(Permission::DELETE)]
     public function delete(
@@ -216,6 +266,7 @@ class IndexController extends AbstractController
      *
      * @throws ClientException
      * @throws FactoryError
+     * @throws SelectError
      */
     private function connect(
         int $id = null,
