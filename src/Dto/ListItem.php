@@ -78,9 +78,9 @@ class ListItem implements JsonSerializable
             'size' => $this->getSize(),
             'modified' => $this->getModified()->format('Y-m-d H:i:s'),
             'type' => $this->getType(),
-            'owner' => $this->getOwner()->jsonSerialize(),
-            'group' => $this->getGroup()->jsonSerialize(),
-            'other' => $this->getOther()->jsonSerialize(),
+            'owner' => $this->getOwner()?->jsonSerialize(),
+            'group' => $this->getGroup()?->jsonSerialize(),
+            'other' => $this->getOther()?->jsonSerialize(),
         ];
     }
 }

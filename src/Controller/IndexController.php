@@ -126,8 +126,10 @@ class IndexController extends AbstractController
             ->setDir($dir ?? '/')
             ->setLoadParents($loadParents)
         ;
+        $list = $dirListStore->getList();
+        $client->disconnect();
 
-        return $this->returnSuccess($dirListStore->getList());
+        return $this->returnSuccess($list);
     }
 
     #[CheckPermission(Permission::READ)]
@@ -159,10 +161,30 @@ class IndexController extends AbstractController
         return $this->returnSuccess();
     }
 
+    /**
+     * @param class-string|null $protocol
+     *
+     * @throws ClientException
+     * @throws FactoryError
+     */
     #[CheckPermission(Permission::WRITE)]
-    public function addDir(string $dir, string $dirname, bool $crypt = false): AjaxResponse
-    {
-        return $this->returnSuccess();
+    public function addDir(
+        ClientService $clientService,
+        string $dir,
+        string $dirname,
+        int $id = null,
+        string $protocol = null,
+        string $url = null,
+        int $port = null,
+        string $user = null,
+        string $password = null,
+        bool $crypt = false
+    ): AjaxResponse {
+        $client = $this->connect($id, $protocol, $url, $port, $user, $password);
+        $dir = $clientService->createDir($client, $dir, $dirname, $crypt);
+        $client->disconnect();
+
+        return $this->returnSuccess($dir);
     }
 
     #[CheckPermission(Permission::DELETE)]

@@ -4,14 +4,19 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Transfer\Service;
 
 use GibsonOS\Core\Service\CryptService;
+use GibsonOS\Core\Service\DateTimeService;
+use GibsonOS\Core\Service\DirService;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 
 class ClientService
 {
-    public function __construct(private CryptService $cryptService)
-    {
+    public function __construct(
+        private CryptService $cryptService,
+        private DirService $dirService,
+        private DateTimeService $dateTimeService
+    ) {
     }
 
     /**
@@ -38,6 +43,25 @@ class ClientService
         ksort($files);
 
         return array_values($dirs) + array_values($files);
+    }
+
+    /**
+     * @throws ClientException
+     */
+    public function createDir(ClientInterface $client, string $dir, string $name, bool $crypt): ListItem
+    {
+        $encryptedName = $crypt ? $this->encryptDirName($name) : $name;
+        $dir = $this->dirService->addEndSlash($dir, '/');
+        $client->createDir($dir . $encryptedName);
+
+        return new ListItem(
+            $encryptedName,
+            $name,
+            $dir,
+            $this->dateTimeService->get(),
+            0,
+            ListItem::TYPE_DIR
+        );
     }
 
     public function encryptDirName(string $dirName): string

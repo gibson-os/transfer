@@ -9,14 +9,17 @@ Ext.define('GibsonOS.module.transfer.index.dir.add.Button', {
         action: 'addDir',
         permission: GibsonOS.Permission.WRITE
     },
-    handler: function(crypt) {
-        var button = this;
-        var menu = button.up('#contextMenu');
-        var view = menu.getParent();
-        var store = view.getStore();
-        var proxy = store.getProxy();
-        var dir = proxy.getReader().jsonData.dir;
-        var extraParams = proxy.extraParams;
+    handler() {
+        this.addFunction(false);
+    },
+    addFunction(crypt) {
+        const button = this;
+        const menu = button.up('#contextMenu');
+        const view = menu.getParent();
+        const store = view.getStore();
+        const proxy = store.getProxy();
+        const dir = proxy.getReader().jsonData.dir;
+        const extraParams = proxy.extraParams;
 
         GibsonOS.module.transfer.index.fn.addDir(dir, {
             id: extraParams.id ? extraParams.id : null,
@@ -26,7 +29,7 @@ Ext.define('GibsonOS.module.transfer.index.dir.add.Button', {
             user: extraParams.user ? extraParams.user : null,
             password: extraParams.password ? extraParams.password : null
         }, function (response) {
-            var data = Ext.decode(response.responseText).data;
+            const data = Ext.decode(response.responseText).data;
 
             view.up().fireEvent('addDir', button, response, dir, data.name);
             view.getStore().add(data);
@@ -35,10 +38,10 @@ Ext.define('GibsonOS.module.transfer.index.dir.add.Button', {
     menu: [{
         text: 'Verschlüsselt',
         iconCls: 'icon16 icon_dir',
-        handler: function() {
-            var menu = this.up('#contextMenu');
-            var button = menu.down('gosModuleTransferIndexDirAddButton');
-            button.handler(true);
+        handler() {
+            const menu = this.up('#contextMenu');
+            const button = menu.down('gosModuleTransferIndexDirAddButton');
+            button.addFunction(true);
         }
     }]
 });
