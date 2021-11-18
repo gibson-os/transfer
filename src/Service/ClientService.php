@@ -3,19 +3,25 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Service;
 
+use GibsonOS\Core\Exception\FactoryError;
+use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\DirService;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
+use GibsonOS\Module\Transfer\Factory\ClientFactory;
+use GibsonOS\Module\Transfer\Repository\SessionRepository;
 
 class ClientService
 {
     public function __construct(
         private CryptService $cryptService,
         private DirService $dirService,
-        private DateTimeService $dateTimeService
+        private DateTimeService $dateTimeService,
+        private SessionRepository $sessionRepository,
+        private ClientFactory $clientFactory
     ) {
     }
 
@@ -110,5 +116,39 @@ class ClientService
         return $this->cryptService->decrypt(
             gzuncompress(base64_decode($strReplace) ?: '')
         );
+    }
+
+    /**
+     * @param class-string<ClientInterface>|null $protocol
+     *
+     * @throws ClientException
+     * @throws FactoryError
+     * @throws SelectError
+     */
+    public function connect(
+        int $id = null,
+        string $protocol = null,
+        string $address = null,
+        int $port = null,
+        string $user = null,
+        string $password = null
+    ): ClientInterface {
+        if ($id !== null) {
+            $session = $this->sessionRepository->getById($id);
+            $protocol = $session->getProtocol();
+            $address = $session->getAddress();
+            $port = $session->getPort();
+            $user = $session->getRemoteUser();
+            $password = $session->getRemotePassword();
+        }
+
+        if ($protocol === null) {
+            throw new ClientException('No protocol set!');
+        }
+
+        $client = $this->clientFactory->get($protocol);
+        $client->connect($address ?? '', $user, $password, $port);
+
+        return $client;
     }
 }

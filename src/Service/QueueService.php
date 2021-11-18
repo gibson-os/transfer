@@ -22,6 +22,8 @@ class QueueService
     }
 
     /**
+     * @param class-string<ClientInterface>|null $protocol
+     *
      * @throws SaveError
      * @throws ClientException
      */

@@ -7,6 +7,7 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\User;
+use GibsonOS\Module\Transfer\Client\ClientInterface;
 use mysqlDatabase;
 
 class Queue extends AbstractModel implements \JsonSerializable
@@ -45,6 +46,9 @@ class Queue extends AbstractModel implements \JsonSerializable
 
     private ?int $port = null;
 
+    /**
+     * @var class-string<ClientInterface>|null
+     */
     private ?string $protocol = null;
 
     private ?string $remoteUser = null;
@@ -201,11 +205,17 @@ class Queue extends AbstractModel implements \JsonSerializable
         return $this;
     }
 
+    /**
+     * @return class-string<ClientInterface>|null
+     */
     public function getProtocol(): ?string
     {
         return $this->protocol;
     }
 
+    /**
+     * @param class-string<ClientInterface>|null $protocol
+     */
     public function setProtocol(?string $protocol): Queue
     {
         $this->protocol = $protocol;
