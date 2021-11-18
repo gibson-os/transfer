@@ -172,13 +172,13 @@ class IndexController extends AbstractController
         ClientService $clientService,
         string $dir,
         string $dirname,
+        bool $crypt = false,
         int $id = null,
         string $protocol = null,
         string $url = null,
         int $port = null,
         string $user = null,
-        string $password = null,
-        bool $crypt = false
+        string $password = null
     ): AjaxResponse {
         $client = $this->connect($id, $protocol, $url, $port, $user, $password);
         $dir = $clientService->createDir($client, $dir, $dirname, $crypt);
@@ -187,9 +187,27 @@ class IndexController extends AbstractController
         return $this->returnSuccess($dir);
     }
 
+    /**
+     * @param class-string|null $protocol
+     *
+     * @throws ClientException
+     * @throws FactoryError
+     */
     #[CheckPermission(Permission::DELETE)]
-    public function delete(string $dir, array $files = null): AjaxResponse
-    {
+    public function delete(
+        ClientService $clientService,
+        string $dir,
+        array $files = null,
+        int $id = null,
+        string $protocol = null,
+        string $url = null,
+        int $port = null,
+        string $user = null,
+        string $password = null,
+    ): AjaxResponse {
+        $client = $this->connect($id, $protocol, $url, $port, $user, $password);
+        $clientService->delete($client, $dir, $files);
+
         return $this->returnSuccess();
     }
 

@@ -64,6 +64,29 @@ class ClientService
         );
     }
 
+    /**
+     * @throws ClientException
+     */
+    public function delete(ClientInterface $client, string $dir, array $files = null): void
+    {
+        foreach ($client->getList($dir) as $item) {
+            if ($files !== null && !in_array($item->getName(), $files)) {
+                continue;
+            }
+
+            $path = $item->getDir() . $item->getName();
+
+            if ($item->getType() === ListItem::TYPE_DIR) {
+                $this->delete($client, $path);
+                $client->deleteDir($path);
+
+                continue;
+            }
+
+            $client->deleteFile($path);
+        }
+    }
+
     public function encryptDirName(string $dirName): string
     {
         return str_replace(
