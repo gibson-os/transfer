@@ -285,12 +285,12 @@ class Queue extends AbstractModel implements \JsonSerializable
         return $this;
     }
 
-    public function getAdded(): ?DateTimeInterface
+    public function getAdded(): DateTimeInterface
     {
         return $this->added;
     }
 
-    public function setAdded(?DateTimeInterface $added): Queue
+    public function setAdded(DateTimeInterface $added): Queue
     {
         $this->added = $added;
 
@@ -373,7 +373,7 @@ class Queue extends AbstractModel implements \JsonSerializable
             'protocol' => $this->getProtocol(),
             'message' => $this->getMessage(),
             'userId' => $this->getUserId(),
-            'added' => $this->added?->format('Y-m-d H:i:s'),
+            'added' => $this->added->format('Y-m-d H:i:s'),
             'start' => $this->start?->format('Y-m-d H:i:s'),
             'end' => $this->end?->format('Y-m-d H:i:s'),
             'cryptDate' => $this->cryptDate?->format('Y-m-d H:i:s'),

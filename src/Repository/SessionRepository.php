@@ -7,9 +7,6 @@ use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Repository\AbstractRepository;
 use GibsonOS\Module\Transfer\Model\Session;
 
-/**
- * @method Session fetchOne(string $where, array $parameters, string $modelClassName)
- */
 class SessionRepository extends AbstractRepository
 {
     /**
