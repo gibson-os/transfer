@@ -14,6 +14,7 @@ use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
+use GibsonOS\Module\Transfer\Service\ClientCryptService;
 use GibsonOS\Module\Transfer\Service\ClientService;
 use GibsonOS\Module\Transfer\Service\QueueService;
 use GibsonOS\Module\Transfer\Store\DirListStore;
@@ -33,6 +34,7 @@ class IndexController extends AbstractController
     public function read(
         DirStore $dirStore,
         ClientService $clientService,
+        ClientCryptService $clientCryptService,
         int $id = null,
         string $protocol = null,
         string $url = null,
@@ -47,7 +49,7 @@ class IndexController extends AbstractController
         $decryptedPath = [];
 
         foreach ($encryptedPath as $item) {
-            $decryptedPath[] = $clientService->decryptDirName($item);
+            $decryptedPath[] = $clientCryptService->decryptDirName($item);
         }
 
         $dirStore
@@ -245,6 +247,7 @@ class IndexController extends AbstractController
     #[CheckPermission(Permission::WRITE)]
     public function addDir(
         ClientService $clientService,
+        ClientCryptService $nameCryptService,
         string $dir,
         string $dirname,
         bool $crypt = false,
@@ -256,7 +259,12 @@ class IndexController extends AbstractController
         string $password = null
     ): AjaxResponse {
         $client = $clientService->connect($id, $protocol, $url, $port, $user, $password);
-        $dir = $clientService->createDir($client, $dir, $dirname, $crypt);
+        $dir = $clientService->createDir(
+            $client,
+            $dir,
+            $crypt ? $nameCryptService->encryptDirName($dirname) : $dirname,
+            $dirname
+        );
         $client->disconnect();
 
         return $this->returnSuccess($dir);

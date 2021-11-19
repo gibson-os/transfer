@@ -6,6 +6,7 @@ namespace GibsonOS\Module\Transfer\Service;
 use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\FileExistsError;
+use GibsonOS\Core\Exception\FileNotFound;
 use GibsonOS\Core\Exception\GetError;
 use GibsonOS\Core\Exception\Model\SaveError;
 use GibsonOS\Core\Exception\Repository\SelectError;
@@ -24,6 +25,7 @@ class QueueService
         private DirService $dirService,
         private FileService $fileService,
         private CryptService $cryptService,
+        private ClientCryptService $clientCryptService,
         private DateTimeService $dateTimeService,
         private ClientService $clientService
     ) {
@@ -110,6 +112,7 @@ class QueueService
                 ->setRemoteUser($cryptUser)
                 ->setRemotePassword($cryptPassword)
                 ->setSessionId($sessionId)
+                ->setCrypt($item->getDecryptedName() !== $item->getName())
                 ->save()
             ;
         }
@@ -157,8 +160,8 @@ class QueueService
                     $crypt
                     ? (
                         is_dir($item)
-                        ? $this->clientService->encryptDirName($fileName)
-                        : $this->clientService->encryptFileName($item)
+                        ? $this->clientCryptService->encryptDirName($fileName)
+                        : $this->clientCryptService->encryptFileName($fileName)
                     )
                     : $fileName
                 )
@@ -220,6 +223,7 @@ class QueueService
      * @throws SaveError
      * @throws SelectError
      * @throws CreateError
+     * @throws FileNotFound
      */
     public function handle(Queue $queue): void
     {
@@ -252,22 +256,39 @@ class QueueService
         }
 
         try {
+            $remotePath = $queue->getRemotePath();
+            $localPath = $queue->getLocalPath();
+
             if ($queue->getDirection() === Queue::DIRECTION_DOWNLOAD) {
                 $this->clientService->get(
                     $client,
-                    $queue->getRemotePath(),
-                    $queue->getLocalPath(),
+                    $remotePath,
+                    $localPath,
                     $queue->isOverwrite(),
-                    $queue->isCrypt()
                 );
+
+                if ($queue->isCrypt()) {
+                    $queue->setCryptDate($this->dateTimeService->get())->save();
+                    $this->clientCryptService->decryptFile($localPath);
+                }
             } else {
+                $encryptedPath = null;
+
+                if ($queue->isCrypt()) {
+                    $queue->setCryptDate($this->dateTimeService->get())->save();
+                    $encryptedPath = $this->clientCryptService->encryptFile($localPath);
+                }
+
                 $this->clientService->put(
                     $client,
-                    $queue->getLocalPath(),
-                    $queue->getRemotePath(),
+                    $encryptedPath ?? $localPath,
+                    $remotePath,
                     $queue->isOverwrite(),
-                    $queue->isCrypt()
                 );
+
+                if ($encryptedPath !== null) {
+                    unlink($encryptedPath);
+                }
             }
 
             $queue->setStatus(Queue::STATUS_FINISHED);

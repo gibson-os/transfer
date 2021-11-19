@@ -7,6 +7,7 @@ use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\FileService;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
+use GibsonOS\Module\Transfer\Service\ClientCryptService;
 use Psr\Log\LoggerInterface;
 
 class SftpClient implements ClientInterface
@@ -23,6 +24,7 @@ class SftpClient implements ClientInterface
 
     public function __construct(
         private DateTimeService $dateTimeService,
+        private ClientCryptService $clientCryptService,
         private FileService $fileService,
         private LoggerInterface $logger
     ) {
@@ -201,7 +203,9 @@ class SftpClient implements ClientInterface
 
             $list[$item] = new ListItem(
                 $item,
-                $item, // @todo crypt einbauen
+                $this->isDir($dir . $item)
+                    ? $this->clientCryptService->decryptDirName($item)
+                    : $this->clientCryptService->decryptFileName($item),
                 $dir,
                 $this->dateTimeService->get('@' . $stats['mtime']),
                 $stats['size'],

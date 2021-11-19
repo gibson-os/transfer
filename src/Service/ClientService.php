@@ -6,9 +6,7 @@ namespace GibsonOS\Module\Transfer\Service;
 use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\FileExistsError;
-use GibsonOS\Core\Exception\FileNotFound;
 use GibsonOS\Core\Exception\Repository\SelectError;
-use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\DirService;
 use GibsonOS\Core\Service\FileService;
@@ -21,7 +19,6 @@ use GibsonOS\Module\Transfer\Repository\SessionRepository;
 class ClientService
 {
     public function __construct(
-        private CryptService $cryptService,
         private DirService $dirService,
         private FileService $fileService,
         private DateTimeService $dateTimeService,
@@ -59,7 +56,7 @@ class ClientService
     /**
      * @throws ClientException
      */
-    public function createDir(ClientInterface $client, string $dir, string $name, bool $crypt): ListItem
+    public function createDir(ClientInterface $client, string $dir, string $name, string $decryptedName = null): ListItem
     {
         $previousDir = $this->dirService->getDirName($dir, '/');
 
@@ -68,16 +65,14 @@ class ClientService
                 $client,
                 $previousDir,
                 $this->dirService->removeEndSlash(str_replace($previousDir, '', $dir)),
-                false
             );
         }
 
-        $encryptedName = $crypt ? $this->encryptDirName($name) : $name;
-        $client->createDir($dir . $encryptedName);
+        $client->createDir($dir . $name);
 
         return new ListItem(
-            $encryptedName,
             $name,
+            $decryptedName ?? $name,
             $dir,
             $this->dateTimeService->get(),
             0,
@@ -101,53 +96,16 @@ class ClientService
 
             if ($item->getType() === ListItem::TYPE_DIR) {
                 $this->delete($client, $path);
-                $client->deleteDir($path);
 
                 continue;
             }
 
             $client->deleteFile($path);
         }
-    }
 
-    public function encryptDirName(string $dirName): string
-    {
-        return str_replace(
-            '/',
-            '_',
-            base64_encode(gzcompress($this->cryptService->encrypt($dirName), 9) ?: '')
-        ) . '.gcd';
-    }
-
-    public function encryptFileName(string $path, string $md5 = null): string
-    {
-        $filename = $this->fileService->getFilename($path, '/');
-
-        if (mb_strlen($md5 ?? '') !== 32) {
-            $md5 = md5_file($path);
+        if ($files === null) {
+            $client->deleteDir($dir);
         }
-
-        $modified = filemtime($path);
-
-        return str_replace(
-            '/',
-            '_',
-            base64_encode(gzcompress($this->cryptService->encrypt($md5 . '-' . $modified . '-' . $filename), 9) ?: '')
-        ) . '.gcf';
-    }
-
-    public function decryptDirName(string $dirName): string
-    {
-        if (mb_strpos($dirName, '.gcd') === false) {
-            return $dirName;
-        }
-
-        $dirName = str_replace('.gcd', '', $dirName);
-        $strReplace = str_replace('_', '/', $dirName);
-
-        return $this->cryptService->decrypt(
-            gzuncompress(base64_decode($strReplace) ?: '')
-        );
     }
 
     /**
@@ -155,7 +113,7 @@ class ClientService
      * @throws FileExistsError
      * @throws CreateError
      */
-    public function get(ClientInterface $client, string $remotePath, string $localPath, bool $overwrite, bool $crypt): void
+    public function get(ClientInterface $client, string $remotePath, string $localPath, bool $overwrite): void
     {
         if (!$overwrite && $this->fileService->exists($localPath)) {
             throw new FileExistsError(sprintf('Local file %s already exists!', $localPath));
@@ -173,9 +131,8 @@ class ClientService
     /**
      * @throws ClientException
      * @throws FileExistsError
-     * @throws FileNotFound
      */
-    public function put(ClientInterface $client, string $localPath, string $remotePath, bool $overwrite, bool $crypt): void
+    public function put(ClientInterface $client, string $localPath, string $remotePath, bool $overwrite): void
     {
         if (!$overwrite && $client->fileExists($remotePath)) {
             throw new FileExistsError(sprintf('Remote file %s already exists!', $remotePath));
@@ -189,17 +146,7 @@ class ClientService
                 $client,
                 $previousDir,
                 $this->dirService->removeEndSlash(str_replace($previousDir, '', $dirName)),
-                false
             );
-        }
-
-        if ($crypt) {
-            $tmpPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'transferCryptFile' . uniqid('', true);
-            $this->cryptService->encryptFile($localPath, $tmpPath);
-            $client->put($tmpPath, $remotePath);
-            unlink($tmpPath);
-
-            return;
         }
 
         $client->put($localPath, $remotePath);
