@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Model;
 
+use GibsonOS\Core\Exception\GetError;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\User;
 use mysqlDatabase;
@@ -15,6 +16,8 @@ class Session extends AbstractModel
 
     /**
      * @param class-string $protocol
+     *
+     * @throws GetError
      */
     public function __construct(
         private string $name,
