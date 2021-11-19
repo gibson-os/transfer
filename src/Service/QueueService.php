@@ -3,8 +3,13 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Service;
 
+use GibsonOS\Core\Exception\CreateError;
+use GibsonOS\Core\Exception\FactoryError;
+use GibsonOS\Core\Exception\FileExistsError;
 use GibsonOS\Core\Exception\Model\SaveError;
+use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Service\CryptService;
+use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\DirService;
 use GibsonOS\Core\Service\FileService;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
@@ -17,7 +22,9 @@ class QueueService
     public function __construct(
         private DirService $dirService,
         private FileService $fileService,
-        private CryptService $cryptService
+        private CryptService $cryptService,
+        private DateTimeService $dateTimeService,
+        private ClientService $clientService
     ) {
     }
 
@@ -97,7 +104,7 @@ class QueueService
                 ->setDirection(Queue::DIRECTION_DOWNLOAD)
                 ->setOverwrite($overwriteItem)
                 ->setUrl($address)
-                ->setPort($port)
+                ->setPort($port ?? $client->getDefaultPort())
                 ->setProtocol($protocol)
                 ->setRemoteUser($cryptUser)
                 ->setRemotePassword($cryptPassword)
@@ -107,7 +114,84 @@ class QueueService
         }
     }
 
-    public function addUpload(ClientInterface $client): void
+    /**
+     * @throws ClientException
+     * @throws FactoryError
+     * @throws FileExistsError
+     * @throws SaveError
+     * @throws SelectError
+     * @throws CreateError
+     */
+    public function handle(Queue $queue): void
     {
+        $queue
+            ->setStatus(Queue::STATUS_ACTIVE)
+            ->setStart($this->dateTimeService->get())
+            ->save()
+        ;
+        $remoteUser = $queue->getRemoteUser();
+        $remotePassword = $queue->getRemotePassword();
+
+        try {
+            $client = $this->clientService->connect(
+                $queue->getSessionId(),
+                $queue->getProtocol(),
+                $queue->getUrl(),
+                $queue->getPort(),
+                $remoteUser === null ? null : $this->cryptService->decrypt($remoteUser),
+                $remotePassword === null ? null : $this->cryptService->decrypt($remotePassword),
+            );
+        } catch (FactoryError|SelectError|ClientException $exception) {
+            $queue
+                ->setStatus(Queue::STATUS_ERROR)
+                ->setMessage('Connection error!')
+                ->setEnd($this->dateTimeService->get())
+                ->save()
+            ;
+
+            throw $exception;
+        }
+
+        try {
+            if ($queue->getDirection() === Queue::DIRECTION_DOWNLOAD) {
+                $this->clientService->get(
+                    $client,
+                    $queue->getRemotePath(),
+                    $queue->getLocalPath(),
+                    $queue->isOverwrite(),
+                    $queue->isCrypt()
+                );
+            } else {
+                $this->clientService->put(
+                    $client,
+                    $queue->getLocalPath(),
+                    $queue->getRemotePath(),
+                    $queue->isOverwrite(),
+                    $queue->isCrypt()
+                );
+            }
+
+            $queue->setStatus(Queue::STATUS_FINISHED);
+        } catch (ClientException $exception) {
+            $queue
+                ->setStatus(Queue::STATUS_ERROR)
+                ->setMessage('Transmission error!')
+            ;
+
+            throw $exception;
+        } catch (CreateError|FileExistsError $exception) {
+            $queue
+                ->setStatus(Queue::STATUS_ERROR)
+                ->setMessage($exception->getMessage())
+            ;
+
+            throw $exception;
+        } finally {
+            $queue
+                ->setEnd($this->dateTimeService->get())
+                ->save()
+            ;
+            $client->disconnect();
+        }
     }
 }

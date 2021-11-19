@@ -7,6 +7,7 @@ use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\FileService;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
+use Psr\Log\LoggerInterface;
 
 class SftpClient implements ClientInterface
 {
@@ -20,8 +21,11 @@ class SftpClient implements ClientInterface
      */
     private $sftpConnection;
 
-    public function __construct(private DateTimeService $dateTimeService, private FileService $fileService)
-    {
+    public function __construct(
+        private DateTimeService $dateTimeService,
+        private FileService $fileService,
+        private LoggerInterface $logger
+    ) {
     }
 
     public function connect(string $address, string $user = null, string $password = null, int $port = null): void
@@ -52,6 +56,8 @@ class SftpClient implements ClientInterface
             throw new ClientException('SSH2 authentication error!');
         }
 
+        $this->logger->info('Connect SSH2');
+
         $this->sftpConnection = ssh2_sftp($connection);
         $this->connection = $connection;
     }
@@ -66,6 +72,8 @@ class SftpClient implements ClientInterface
             throw new ClientException('SSH2 disconnection error!');
         }
 
+        $this->logger->info('Disconnect SSH2');
+
         $this->connection = null;
         $this->sftpConnection = null;
     }
@@ -79,6 +87,8 @@ class SftpClient implements ClientInterface
         if (!ssh2_sftp_unlink($this->sftpConnection, $path)) {
             throw new ClientException(sprintf('SSH2 file %s could not be deleted!', $path));
         }
+
+        $this->logger->info('Delete SSH2 file');
     }
 
     public function deleteDir(string $path): void
@@ -90,6 +100,8 @@ class SftpClient implements ClientInterface
         if (!ssh2_sftp_rmdir($this->sftpConnection, $path)) {
             throw new ClientException(sprintf('SSH2 directory %s could not be deleted!', $path));
         }
+
+        $this->logger->info('Delete SSH2 dir');
     }
 
     public function createDir(string $path): void
@@ -101,6 +113,8 @@ class SftpClient implements ClientInterface
         if (!ssh2_sftp_mkdir($this->sftpConnection, $path)) {
             throw new ClientException(sprintf('SSH2 directory %s could not be created!', $path));
         }
+
+        $this->logger->info('Create SSH2 dir');
     }
 
     public function get(string $remotePath, string $localPath): void
@@ -112,6 +126,8 @@ class SftpClient implements ClientInterface
         if (!ssh2_scp_recv($this->connection, $remotePath, $localPath)) {
             throw new ClientException(sprintf('SSH2 file %s could not be saved on %s!', $remotePath, $localPath));
         }
+
+        $this->logger->info(sprintf('Get file %s to %s', $remotePath, $localPath));
     }
 
     public function put(string $localPath, string $remotePath): void
@@ -123,6 +139,8 @@ class SftpClient implements ClientInterface
         if (!ssh2_scp_send($this->connection, $remotePath, $localPath)) {
             throw new ClientException(sprintf('SSH2 file %s could not be saved on %s!', $localPath, $remotePath));
         }
+
+        $this->logger->info(sprintf('Put file %s to %s', $localPath, $remotePath));
     }
 
     public function isDir(string $path): bool
@@ -220,5 +238,10 @@ class SftpClient implements ClientInterface
          * @psalm-suppress InvalidOperand
          */
         return 'ssh2.sftp://' . $this->sftpConnection;
+    }
+
+    public function getDefaultPort(): int
+    {
+        return 22;
     }
 }

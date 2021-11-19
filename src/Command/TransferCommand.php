@@ -4,28 +4,34 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Transfer\Command;
 
 use GibsonOS\Core\Command\AbstractCommand;
+use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
+use GibsonOS\Core\Exception\FileExistsError;
 use GibsonOS\Core\Exception\Model\SaveError;
 use GibsonOS\Core\Exception\Repository\SelectError;
-use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 use GibsonOS\Module\Transfer\Model\Queue;
 use GibsonOS\Module\Transfer\Repository\QueueRepository;
-use GibsonOS\Module\Transfer\Service\ClientService;
+use GibsonOS\Module\Transfer\Service\QueueService;
 use Psr\Log\LoggerInterface;
 
 class TransferCommand extends AbstractCommand
 {
     public function __construct(
-        protected LoggerInterface $logger,
+        LoggerInterface $logger,
         private QueueRepository $queueRepository,
-        private ClientService $clientService,
-        private CryptService $cryptService
+        private QueueService $queueService
     ) {
+        parent::__construct($logger);
     }
 
     /**
+     * @throws ClientException
      * @throws SaveError
+     * @throws SelectError
+     * @throws FactoryError
+     * @throws FileExistsError
+     * @throws CreateError
      */
     protected function run(): int
     {
@@ -39,46 +45,7 @@ class TransferCommand extends AbstractCommand
             return 0;
         }
 
-        $queue->setStatus(Queue::STATUS_ACTIVE)->save();
-        $remoteUser = $queue->getRemoteUser();
-        $remotePassword = $queue->getRemotePassword();
-
-        try {
-            $client = $this->clientService->connect(
-                $queue->getSessionId(),
-                $queue->getProtocol(),
-                $queue->getUrl(),
-                $queue->getPort(),
-                $remoteUser === null ? null : $this->cryptService->decrypt($remoteUser),
-                $remotePassword === null ? null : $this->cryptService->decrypt($remotePassword),
-            );
-        } catch (FactoryError|SelectError|ClientException) {
-            $queue
-                ->setStatus(Queue::STATUS_ERROR)
-                ->setMessage('Connection error!')
-                ->save()
-            ;
-
-            return 1;
-        }
-
-        try {
-            if ($queue->getDirection() === Queue::DIRECTION_DOWNLOAD) {
-                $client->get($queue->getRemotePath(), $queue->getLocalPath());
-            } else {
-                $client->put($queue->getLocalPath(), $queue->getRemotePath());
-            }
-        } catch (ClientException) {
-            $queue
-                ->setStatus(Queue::STATUS_ERROR)
-                ->setMessage('Transmission error!')
-                ->save()
-            ;
-
-            return 1;
-        }
-
-        $queue->setStatus(Queue::STATUS_FINISHED)->save();
+        $this->queueService->handle($queue);
 
         return 0;
     }

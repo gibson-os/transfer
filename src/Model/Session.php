@@ -23,7 +23,7 @@ class Session extends AbstractModel
         private string $name,
         private string $address,
         private string $protocol,
-        private int $port = 21,
+        private int $port = 0,
         private ?string $remoteUser = null,
         private ?string $remotePassword = null,
         private ?string $localPath = null,

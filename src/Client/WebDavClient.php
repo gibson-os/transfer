@@ -64,4 +64,9 @@ class WebDavClient implements ClientInterface
     {
         // TODO: Implement openDir() method.
     }
+
+    public function getDefaultPort(): int
+    {
+        return 80;
+    }
 }

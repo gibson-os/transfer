@@ -3,11 +3,14 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Service;
 
+use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
+use GibsonOS\Core\Exception\FileExistsError;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\DirService;
+use GibsonOS\Core\Service\FileService;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
@@ -19,6 +22,7 @@ class ClientService
     public function __construct(
         private CryptService $cryptService,
         private DirService $dirService,
+        private FileService $fileService,
         private DateTimeService $dateTimeService,
         private SessionRepository $sessionRepository,
         private ClientFactory $clientFactory
@@ -116,6 +120,39 @@ class ClientService
         return $this->cryptService->decrypt(
             gzuncompress(base64_decode($strReplace) ?: '')
         );
+    }
+
+    /**
+     * @throws ClientException
+     * @throws FileExistsError
+     * @throws CreateError
+     */
+    public function get(ClientInterface $client, string $remotePath, string $localPath, bool $overwrite, bool $crypt): void
+    {
+        if (!$overwrite && $this->fileService->exists($localPath)) {
+            throw new FileExistsError(sprintf('Local file %s already exists!', $localPath));
+        }
+
+        $dirName = $this->dirService->getDirName($localPath);
+
+        if (!$this->fileService->exists($dirName)) {
+            $this->dirService->create($dirName);
+        }
+
+        $client->get($remotePath, $localPath);
+    }
+
+    /**
+     * @throws ClientException
+     * @throws FileExistsError
+     */
+    public function put(ClientInterface $client, string $localPath, string $remotePath, bool $overwrite, bool $crypt): void
+    {
+        if (!$overwrite && $client->fileExists($remotePath)) {
+            throw new FileExistsError(sprintf('Remote file %s already exists!', $remotePath));
+        }
+
+        $client->put($localPath, $remotePath);
     }
 
     /**

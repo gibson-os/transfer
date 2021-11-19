@@ -64,4 +64,6 @@ interface ClientInterface
      * @return ListItem[]
      */
     public function getList(string $dir): array;
+
+    public function getDefaultPort(): int;
 }
