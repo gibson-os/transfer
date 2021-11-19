@@ -6,6 +6,7 @@ namespace GibsonOS\Module\Transfer\Service;
 use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\FileExistsError;
+use GibsonOS\Core\Exception\FileNotFound;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
@@ -67,7 +68,7 @@ class ClientService
                 $client,
                 $previousDir,
                 $this->dirService->removeEndSlash(str_replace($previousDir, '', $dir)),
-                $crypt
+                false
             );
         }
 
@@ -118,6 +119,23 @@ class ClientService
         ) . '.gcd';
     }
 
+    public function encryptFileName(string $path, string $md5 = null): string
+    {
+        $filename = $this->fileService->getFilename($path, '/');
+
+        if (mb_strlen($md5 ?? '') !== 32) {
+            $md5 = md5_file($path);
+        }
+
+        $modified = filemtime($path);
+
+        return str_replace(
+            '/',
+            '_',
+            base64_encode(gzcompress($this->cryptService->encrypt($md5 . '-' . $modified . '-' . $filename), 9) ?: '')
+        ) . '.gcf';
+    }
+
     public function decryptDirName(string $dirName): string
     {
         if (mb_strpos($dirName, '.gcd') === false) {
@@ -155,6 +173,7 @@ class ClientService
     /**
      * @throws ClientException
      * @throws FileExistsError
+     * @throws FileNotFound
      */
     public function put(ClientInterface $client, string $localPath, string $remotePath, bool $overwrite, bool $crypt): void
     {
@@ -170,8 +189,17 @@ class ClientService
                 $client,
                 $previousDir,
                 $this->dirService->removeEndSlash(str_replace($previousDir, '', $dirName)),
-                $crypt
+                false
             );
+        }
+
+        if ($crypt) {
+            $tmpPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'transferCryptFile' . uniqid('', true);
+            $this->cryptService->encryptFile($localPath, $tmpPath);
+            $client->put($tmpPath, $remotePath);
+            unlink($tmpPath);
+
+            return;
         }
 
         $client->put($localPath, $remotePath);

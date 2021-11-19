@@ -150,8 +150,19 @@ class QueueService
             if ($files !== null && !in_array($fileName, $files)) {
                 continue;
             }
-            // @todo crypt
-            $remoteItemPath = $remotePath . $fileName;
+
+            $remoteItemPath =
+                $remotePath .
+                (
+                    $crypt
+                    ? (
+                        is_dir($item)
+                        ? $this->clientService->encryptDirName($fileName)
+                        : $this->clientService->encryptFileName($item)
+                    )
+                    : $fileName
+                )
+            ;
 
             if (is_dir($item)) {
                 $this->addUpload(
@@ -196,6 +207,7 @@ class QueueService
                 ->setRemoteUser($cryptUser)
                 ->setRemotePassword($cryptPassword)
                 ->setSessionId($sessionId)
+                ->setCrypt($crypt)
                 ->save()
             ;
         }
