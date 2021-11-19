@@ -5,21 +5,25 @@ Ext.define('GibsonOS.module.transfer.index.upload.Button', {
     text: 'Upload',
     iconCls: 'icon_system system_upload',
     requiredPermission: {
+        module: 'transfer',
         task: 'index',
         action: 'upload',
         permission: GibsonOS.Permission.WRITE
     },
-    handler: function(crypt) {
-        var menu = this.up('#contextMenu');
-        var parent = menu.getParent();
-        var records = parent.getSelectionModel().getSelection();
-        var store = parent.getStore();
-        var proxy = store.getProxy();
-        var dir = proxy.getReader().jsonData.dir;
-        var extraParams = {};
+    handler() {
+        this.uploadFunction(false);
+    },
+    uploadFunction(crypt) {
+        const menu = this.up('#contextMenu');
+        const parent = menu.getParent();
+        const records = parent.getSelectionModel().getSelection();
+        const store = parent.getStore();
+        const proxy = store.getProxy();
+        const dir = proxy.getReader().jsonData.dir;
+        let extraParams = {};
 
-        var remotePath = null;
-        var activeTab = GibsonOS.module.transfer.index.fn.getConnectedTransferNeighbor(parent);
+        let remotePath = null;
+        const activeTab = GibsonOS.module.transfer.index.fn.getConnectedTransferNeighbor(parent);
 
         if (activeTab) {
             remotePath = activeTab.down('#transferIndexView').gos.store.getProxy().getReader().jsonData.dir;
@@ -27,7 +31,7 @@ Ext.define('GibsonOS.module.transfer.index.upload.Button', {
         }
 
         if (remotePath) {
-            var files = [];
+            let files = [];
 
             Ext.iterate(records, function(record) {
                 files.push(record.get('name'));
@@ -47,9 +51,9 @@ Ext.define('GibsonOS.module.transfer.index.upload.Button', {
         text: 'Verschlüsselt',
         iconCls: 'icon_system system_upload',
         handler: function() {
-            var menu = this.up('#contextMenu');
-            var button = menu.down('gosModuleTransferIndexUploadButton');
-            button.handler(true);
+            const menu = this.up('#contextMenu');
+            const button = menu.down('gosModuleTransferIndexUploadButton');
+            button.uploadFunction(true);
         }
     }]
 });

@@ -37,16 +37,14 @@ Ext.define('GibsonOS.module.transfer.index.TabPanel', {
         this.down('#explorerDirView256').itemContextMenu.insert(2, {xtype: 'gosModuleTransferIndexUploadButton'});
         this.down('#explorerDirTree').itemContextMenu.insert(2, {
             xtype: 'gosModuleTransferIndexUploadButton',
-            handler: function(crypt) {
-                var menu = this.up('#contextMenu');
-                var parent = menu.getParent();
-                var record = menu.getRecord();
-                var store = parent.getStore();
-                var proxy = store.getProxy();
-                var extraParams = {};
+            uploadFunction(crypt) {
+                const menu = this.up('#contextMenu');
+                const parent = menu.getParent();
+                const record = menu.getRecord();
+                let extraParams = {};
 
-                var remotePath = null;
-                var activeTab = GibsonOS.module.transfer.index.fn.getConnectedTransferNeighbor(parent);
+                let remotePath = null;
+                const activeTab = GibsonOS.module.transfer.index.fn.getConnectedTransferNeighbor(parent);
 
                 if (activeTab) {
                     remotePath = activeTab.down('#transferIndexView').gos.store.getProxy().getReader().jsonData.dir;

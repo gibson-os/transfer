@@ -6,6 +6,7 @@ namespace GibsonOS\Module\Transfer\Service;
 use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\FileExistsError;
+use GibsonOS\Core\Exception\GetError;
 use GibsonOS\Core\Exception\Model\SaveError;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Service\CryptService;
@@ -102,6 +103,92 @@ class QueueService
                 ->setRemotePath($remoteItemPath)
                 ->setSize($item->getSize())
                 ->setDirection(Queue::DIRECTION_DOWNLOAD)
+                ->setOverwrite($overwriteItem)
+                ->setUrl($address)
+                ->setPort($port ?? $client->getDefaultPort())
+                ->setProtocol($protocol)
+                ->setRemoteUser($cryptUser)
+                ->setRemotePassword($cryptPassword)
+                ->setSessionId($sessionId)
+                ->save()
+            ;
+        }
+    }
+
+    /**
+     * @param class-string<ClientInterface>|null $protocol
+     *
+     * @throws SaveError
+     * @throws ClientException
+     * @throws GetError
+     */
+    public function addUpload(
+        ClientInterface $client,
+        string $remotePath,
+        string $localPath,
+        bool $crypt,
+        array $files = null,
+        array|bool $overwrite = null,
+        array|bool $ignore = null,
+        int $sessionId = null,
+        string $protocol = null,
+        string $address = null,
+        int $port = null,
+        string $user = null,
+        string $password = null
+    ): void {
+        ini_set('max_execution_time', '0');
+        $remotePath = $this->dirService->addEndSlash($remotePath, '/');
+        $localPath = $this->dirService->addEndSlash($localPath);
+
+        $cryptUser = $user === null ? null : $this->cryptService->encrypt($user);
+        $cryptPassword = $password === null ? null : $this->cryptService->encrypt($password);
+
+        foreach ($this->dirService->getFiles($localPath) as $item) {
+            $fileName = $this->fileService->getFilename($item);
+
+            if ($files !== null && !in_array($fileName, $files)) {
+                continue;
+            }
+            // @todo crypt
+            $remoteItemPath = $remotePath . $fileName;
+
+            if (is_dir($item)) {
+                $this->addUpload(
+                    $client,
+                    $remoteItemPath,
+                    $item,
+                    $crypt,
+                    null,
+                    $overwrite,
+                    $ignore,
+                    $sessionId,
+                    $protocol,
+                    $address,
+                    $port,
+                    $user,
+                    $password
+                );
+
+                continue;
+            }
+
+            $overwriteItem = $overwrite === true || (is_array($overwrite) && array_search($remoteItemPath, $overwrite) !== false);
+            $ignoreItem = $ignore === true || (is_array($ignore) && array_search($remoteItemPath, $ignore) !== false);
+
+            if (!$overwriteItem && $client->fileExists($remoteItemPath)) {
+                if ($ignoreItem) {
+                    continue;
+                }
+
+                // @todo exception mit buttons
+            }
+
+            (new Queue())
+                ->setLocalPath($item)
+                ->setRemotePath($remoteItemPath)
+                ->setSize(filesize($item))
+                ->setDirection(Queue::DIRECTION_UPLOAD)
                 ->setOverwrite($overwriteItem)
                 ->setUrl($address)
                 ->setPort($port ?? $client->getDefaultPort())

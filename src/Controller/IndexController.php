@@ -6,6 +6,7 @@ namespace GibsonOS\Module\Transfer\Controller;
 use GibsonOS\Core\Attribute\CheckPermission;
 use GibsonOS\Core\Controller\AbstractController;
 use GibsonOS\Core\Exception\FactoryError;
+use GibsonOS\Core\Exception\GetError;
 use GibsonOS\Core\Exception\Model\SaveError;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Model\User\Permission;
@@ -163,19 +164,55 @@ class IndexController extends AbstractController
             $user,
             $password
         );
+        $client->disconnect();
 
         return $this->returnSuccess();
     }
 
+    /**
+     * @param class-string<ClientInterface>|null $protocol
+     *
+     * @throws ClientException
+     * @throws FactoryError
+     * @throws SaveError
+     * @throws SelectError
+     * @throws GetError
+     */
     #[CheckPermission(Permission::WRITE)]
     public function upload(
+        ClientService $clientService,
+        QueueService $queueService,
         string $remotePath,
         string $dir,
         array $files = null,
         bool $overwrite = false,
         bool $ignore = false,
-        bool $crypt = false
+        bool $crypt = false,
+        int $id = null,
+        string $protocol = null,
+        string $url = null,
+        int $port = null,
+        string $user = null,
+        string $password = null
     ): AjaxResponse {
+        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password);
+        $queueService->addUpload(
+            $client,
+            $remotePath,
+            $dir,
+            $crypt,
+            $files,
+            $overwrite,
+            $ignore,
+            $id,
+            $protocol,
+            $url,
+            $port,
+            $user,
+            $password
+        );
+        $client->disconnect();
+
         return $this->returnSuccess();
     }
 
@@ -246,6 +283,7 @@ class IndexController extends AbstractController
     ): AjaxResponse {
         $client = $clientService->connect($id, $protocol, $url, $port, $user, $password);
         $clientService->delete($client, $dir, $files);
+        $client->disconnect();
 
         return $this->returnSuccess();
     }

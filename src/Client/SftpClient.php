@@ -123,11 +123,11 @@ class SftpClient implements ClientInterface
             throw new ClientException('SSH2 not connected!');
         }
 
+        $this->logger->info(sprintf('Get file %s to %s', $remotePath, $localPath));
+
         if (!ssh2_scp_recv($this->connection, $remotePath, $localPath)) {
             throw new ClientException(sprintf('SSH2 file %s could not be saved on %s!', $remotePath, $localPath));
         }
-
-        $this->logger->info(sprintf('Get file %s to %s', $remotePath, $localPath));
     }
 
     public function put(string $localPath, string $remotePath): void
@@ -136,11 +136,11 @@ class SftpClient implements ClientInterface
             throw new ClientException('SSH2 not connected!');
         }
 
-        if (!ssh2_scp_send($this->connection, $remotePath, $localPath)) {
+        $this->logger->info(sprintf('Put file %s to %s', $localPath, $remotePath));
+
+        if (!ssh2_scp_send($this->connection, $localPath, $remotePath)) {
             throw new ClientException(sprintf('SSH2 file %s could not be saved on %s!', $localPath, $remotePath));
         }
-
-        $this->logger->info(sprintf('Put file %s to %s', $localPath, $remotePath));
     }
 
     public function isDir(string $path): bool

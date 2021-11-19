@@ -60,8 +60,18 @@ class ClientService
      */
     public function createDir(ClientInterface $client, string $dir, string $name, bool $crypt): ListItem
     {
+        $previousDir = $this->dirService->getDirName($dir, '/');
+
+        if (!$client->fileExists($dir)) {
+            $this->createDir(
+                $client,
+                $previousDir,
+                $this->dirService->removeEndSlash(str_replace($previousDir, '', $dir)),
+                $crypt
+            );
+        }
+
         $encryptedName = $crypt ? $this->encryptDirName($name) : $name;
-        $dir = $this->dirService->addEndSlash($dir, '/');
         $client->createDir($dir . $encryptedName);
 
         return new ListItem(
@@ -150,6 +160,18 @@ class ClientService
     {
         if (!$overwrite && $client->fileExists($remotePath)) {
             throw new FileExistsError(sprintf('Remote file %s already exists!', $remotePath));
+        }
+
+        $dirName = $this->dirService->getDirName($remotePath, '/');
+
+        if (!$client->fileExists($dirName)) {
+            $previousDir = $this->dirService->getDirName($dirName, '/');
+            $this->createDir(
+                $client,
+                $previousDir,
+                $this->dirService->removeEndSlash(str_replace($previousDir, '', $dirName)),
+                $crypt
+            );
         }
 
         $client->put($localPath, $remotePath);
