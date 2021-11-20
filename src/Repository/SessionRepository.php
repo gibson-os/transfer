@@ -16,4 +16,24 @@ class SessionRepository extends AbstractRepository
     {
         return $this->fetchOne('`id`=?', [$id], Session::class);
     }
+
+    /**
+     * @throws SelectError
+     */
+    public function findByName(string $name, int $userId = null): array
+    {
+        $userWhere = '`user_id` IS NULL';
+        $whereParameters = [$name . '%'];
+
+        if ($userId !== null) {
+            $userWhere .= ' OR `user_id`=?';
+            $whereParameters[] = $userId;
+        }
+
+        return $this->fetchAll(
+            '`name` LIKE ? AND (' . $userWhere . ')',
+            $whereParameters,
+            Session::class
+        );
+    }
 }

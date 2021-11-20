@@ -3,46 +3,36 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Model;
 
-use GibsonOS\Core\Exception\GetError;
 use GibsonOS\Core\Model\AbstractModel;
+use GibsonOS\Core\Model\AutoCompleteModelInterface;
 use GibsonOS\Core\Model\User;
-use mysqlDatabase;
+use JsonSerializable;
 
-class Session extends AbstractModel
+class Session extends AbstractModel implements JsonSerializable, AutoCompleteModelInterface
 {
+    private ?int $id = null;
+
+    private string $name;
+
+    private string $url;
+
+    private string $protocol;
+
+    private int $port = 0;
+
+    private ?string $remoteUser = null;
+
+    private ?string $remotePassword = null;
+
+    private ?string $localPath = null;
+
+    private ?string $remotePath = null;
+
+    private ?string $data = null;
+
     private ?int $userId = null;
 
     private ?User $user = null;
-
-    /**
-     * @param class-string $protocol
-     *
-     * @throws GetError
-     */
-    public function __construct(
-        private string $name,
-        private string $address,
-        private string $protocol,
-        private int $port = 0,
-        private ?string $remoteUser = null,
-        private ?string $remotePassword = null,
-        private ?string $localPath = null,
-        private ?string $remotePath = null,
-        private ?string $data = null,
-        private ?int $id = null,
-        int $userId = null,
-        User $user = null,
-        mysqlDatabase $database = null
-    ) {
-        parent::__construct($database);
-
-        $this->setForeignValueByModelOrId(
-            $user,
-            $userId,
-            fn (?User $model) => $this->setUser($model),
-            fn (?int $id) => $this->setUserId($id)
-        );
-    }
 
     public static function getTableName(): string
     {
@@ -61,14 +51,14 @@ class Session extends AbstractModel
         return $this;
     }
 
-    public function getAddress(): string
+    public function getUrl(): string
     {
-        return $this->address;
+        return $this->url;
     }
 
-    public function setAddress(string $address): Session
+    public function setUrl(string $url): Session
     {
-        $this->address = $address;
+        $this->url = $url;
 
         return $this;
     }
@@ -197,5 +187,23 @@ class Session extends AbstractModel
         $this->user = $user;
 
         return $this;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'url' => $this->getUrl(),
+            'protocol' => $this->getProtocol(),
+            'port' => $this->getPort(),
+            'remotePath' => $this->getRemotePath(),
+            'localPath' => $this->getLocalPath(),
+        ];
+    }
+
+    public function getAutoCompleteId(): string|int|float
+    {
+        return $this->getId() ?? 0;
     }
 }

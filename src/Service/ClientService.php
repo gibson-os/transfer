@@ -178,7 +178,7 @@ class ClientService
         if ($id !== null) {
             $session = $this->sessionRepository->getById($id);
             $protocol = $session->getProtocol();
-            $address = $session->getAddress();
+            $address = $session->getUrl();
             $port = $session->getPort();
             $user = $session->getRemoteUser();
             $password = $session->getRemotePassword();

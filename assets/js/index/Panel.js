@@ -273,7 +273,8 @@ Ext.define('GibsonOS.module.transfer.index.Panel', {
             },{
                 iconCls: 'icon_system system_save',
                 requiredPermission: {
-                    action: 'save',
+                    module: 'transfer',
+                    task: 'session',
                     permission: GibsonOS.Permission.WRITE + GibsonOS.Permission.MANAGE
                 },
                 handler: function() {
