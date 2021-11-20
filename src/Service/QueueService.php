@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Service;
 
+use GibsonOS\Core\Exception\AbstractException;
 use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\FileExistsError;
@@ -14,10 +15,13 @@ use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\DirService;
 use GibsonOS\Core\Service\FileService;
+use GibsonOS\Core\Utility\StatusCode;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
+use GibsonOS\Module\Transfer\Exception\QueueException;
 use GibsonOS\Module\Transfer\Model\Queue;
+use GibsonOS\Module\Transfer\Repository\QueueRepository;
 
 class QueueService
 {
@@ -27,7 +31,8 @@ class QueueService
         private CryptService $cryptService,
         private ClientCryptService $clientCryptService,
         private DateTimeService $dateTimeService,
-        private ClientService $clientService
+        private ClientService $clientService,
+        private QueueRepository $queueRepository
     ) {
     }
 
@@ -36,14 +41,17 @@ class QueueService
      *
      * @throws SaveError
      * @throws ClientException
+     * @throws QueueException
      */
     public function addDownload(
         ClientInterface $client,
         string $localPath,
         string $remotePath,
         array $files = null,
-        array|bool $overwrite = null,
-        array|bool $ignore = null,
+        bool $overwriteAll = false,
+        array $overwrite = [],
+        bool $ignoreAll = false,
+        array $ignore = [],
         int $sessionId = null,
         string $protocol = null,
         string $address = null,
@@ -56,7 +64,7 @@ class QueueService
         $remotePath = $this->dirService->addEndSlash($remotePath, '/');
 
         if (!$this->dirService->isWritable($localPath, $this->fileService)) {
-            // @todo exception
+            throw new QueueException(sprintf('Directory %s is not writable!', $localPath));
         }
 
         $cryptUser = $user === null ? null : $this->cryptService->encrypt($user);
@@ -76,7 +84,9 @@ class QueueService
                     $localItemPath,
                     $remoteItemPath,
                     null,
+                    $overwriteAll,
                     $overwrite,
+                    $ignoreAll,
                     $ignore,
                     $sessionId,
                     $protocol,
@@ -89,18 +99,8 @@ class QueueService
                 continue;
             }
 
-            $overwriteItem = $overwrite === true || (is_array($overwrite) && array_search($localItemPath, $overwrite) !== false);
-            $ignoreItem = $ignore === true || (is_array($ignore) && array_search($localItemPath, $ignore) !== false);
-
-            if (!$overwriteItem && $this->fileService->exists($localItemPath)) {
-                if ($ignoreItem) {
-                    continue;
-                }
-
-                // @todo exception mit buttons
-            }
-
-            (new Queue())
+            $overwriteItem = $overwriteAll === true || array_search($localItemPath, $overwrite) !== false;
+            $queue = (new Queue())
                 ->setLocalPath($localItemPath)
                 ->setRemotePath($remoteItemPath)
                 ->setSize($item->getSize())
@@ -113,8 +113,21 @@ class QueueService
                 ->setRemotePassword($cryptPassword)
                 ->setSessionId($sessionId)
                 ->setCrypt($item->getDecryptedName() !== $item->getName())
-                ->save()
             ;
+
+            if ($this->queueRepository->queueExists($queue)) {
+                continue;
+            }
+
+            if (!$overwriteItem && $this->fileService->exists($localItemPath)) {
+                if ($ignoreAll === true || array_search($localItemPath, $ignore) !== false) {
+                    continue;
+                }
+
+                $this->throwOverwriteException($localItemPath, $overwrite, $ignore);
+            }
+
+            $queue->save();
         }
     }
 
@@ -124,6 +137,7 @@ class QueueService
      * @throws SaveError
      * @throws ClientException
      * @throws GetError
+     * @throws QueueException
      */
     public function addUpload(
         ClientInterface $client,
@@ -131,8 +145,10 @@ class QueueService
         string $localPath,
         bool $crypt,
         array $files = null,
-        array|bool $overwrite = null,
-        array|bool $ignore = null,
+        bool $overwriteAll = false,
+        array $overwrite = [],
+        bool $ignoreAll = false,
+        array $ignore = [],
         int $sessionId = null,
         string $protocol = null,
         string $address = null,
@@ -154,18 +170,13 @@ class QueueService
                 continue;
             }
 
-            $remoteItemPath =
-                $remotePath .
-                (
-                    $crypt
-                    ? (
-                        is_dir($item)
-                        ? $this->clientCryptService->encryptDirName($fileName)
-                        : $this->clientCryptService->encryptFileName($fileName)
-                    )
-                    : $fileName
-                )
-            ;
+            $decryptedRemoteItemPath = $remotePath . $fileName;
+            $encryptedRemoteItemPath = $remotePath . (
+                is_dir($item)
+                    ? $this->clientCryptService->encryptDirName($fileName)
+                    : $this->clientCryptService->encryptFileName($fileName)
+            );
+            $remoteItemPath = $crypt ? $encryptedRemoteItemPath : $decryptedRemoteItemPath;
 
             if (is_dir($item)) {
                 $this->addUpload(
@@ -174,7 +185,9 @@ class QueueService
                     $item,
                     $crypt,
                     null,
+                    $overwriteAll,
                     $overwrite,
+                    $ignoreAll,
                     $ignore,
                     $sessionId,
                     $protocol,
@@ -187,18 +200,8 @@ class QueueService
                 continue;
             }
 
-            $overwriteItem = $overwrite === true || (is_array($overwrite) && array_search($remoteItemPath, $overwrite) !== false);
-            $ignoreItem = $ignore === true || (is_array($ignore) && array_search($remoteItemPath, $ignore) !== false);
-
-            if (!$overwriteItem && $client->fileExists($remoteItemPath)) {
-                if ($ignoreItem) {
-                    continue;
-                }
-
-                // @todo exception mit buttons
-            }
-
-            (new Queue())
+            $overwriteItem = $overwriteAll === true || array_search($decryptedRemoteItemPath, $overwrite) !== false;
+            $queue = (new Queue())
                 ->setLocalPath($item)
                 ->setRemotePath($remoteItemPath)
                 ->setSize(filesize($item))
@@ -211,8 +214,21 @@ class QueueService
                 ->setRemotePassword($cryptPassword)
                 ->setSessionId($sessionId)
                 ->setCrypt($crypt)
-                ->save()
             ;
+
+            if ($this->queueRepository->queueExists($queue)) {
+                continue;
+            }
+
+            if (!$overwriteItem && $client->fileExists($remoteItemPath)) {
+                if ($ignoreAll === true || array_search($decryptedRemoteItemPath, $ignore) !== false) {
+                    continue;
+                }
+
+                $this->throwOverwriteException($decryptedRemoteItemPath, $overwrite, $ignore);
+            }
+
+            $queue->save();
         }
     }
 
@@ -313,5 +329,24 @@ class QueueService
             ;
             $client->disconnect();
         }
+    }
+
+    /**
+     * @throws QueueException
+     */
+    private function throwOverwriteException(string $path, array $overwrite, array $ignore): void
+    {
+        $overwrite[] = $path;
+        $ignore[] = $path;
+
+        throw (new QueueException(sprintf('Datei %s existiert bereits. Überschreiben?', $path), StatusCode::CONFLICT))
+            ->setTitle('Datei überschreiben?')
+            ->setType(AbstractException::QUESTION)
+            ->addButton('Überschreiben', 'overwrite[]', $overwrite)
+            ->addButton('Alle Überschreiben', 'overwriteAll', true)
+            ->addButton('Ignorieren', 'ignore[]', $ignore)
+            ->addButton('Alle Ignorieren', 'ignoreAll', true)
+            ->addButton('Abbrechen')
+        ;
     }
 }

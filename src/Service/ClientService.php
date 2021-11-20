@@ -115,8 +115,12 @@ class ClientService
      */
     public function get(ClientInterface $client, string $remotePath, string $localPath, bool $overwrite): void
     {
-        if (!$overwrite && $this->fileService->exists($localPath)) {
-            throw new FileExistsError(sprintf('Local file %s already exists!', $localPath));
+        if ($this->fileService->exists($localPath)) {
+            if (!$overwrite) {
+                throw new FileExistsError(sprintf('Local file %s already exists!', $localPath));
+            }
+
+            unlink($localPath);
         }
 
         $dirName = $this->dirService->getDirName($localPath);
@@ -134,8 +138,12 @@ class ClientService
      */
     public function put(ClientInterface $client, string $localPath, string $remotePath, bool $overwrite): void
     {
-        if (!$overwrite && $client->fileExists($remotePath)) {
-            throw new FileExistsError(sprintf('Remote file %s already exists!', $remotePath));
+        if ($client->fileExists($remotePath)) {
+            if (!$overwrite) {
+                throw new FileExistsError(sprintf('Remote file %s already exists!', $remotePath));
+            }
+
+            $client->deleteFile($remotePath);
         }
 
         $dirName = $this->dirService->getDirName($remotePath, '/');

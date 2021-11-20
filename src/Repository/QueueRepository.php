@@ -23,4 +23,41 @@ class QueueRepository extends AbstractRepository
 
         return empty($count) ? 0 : $count[0];
     }
+
+    public function queueExists(Queue $queue): bool
+    {
+        $where = ['`status`=?'];
+        $whereParameters = [Queue::STATUS_WAIT];
+
+        $this->addWhere($queue, 'session_id', 'getSessionId', $where, $whereParameters);
+        $this->addWhere($queue, 'url', 'getUrl', $where, $whereParameters);
+        $this->addWhere($queue, 'port', 'getPort', $where, $whereParameters);
+        $this->addWhere($queue, 'protocol', 'getProtocol', $where, $whereParameters);
+        $this->addWhere($queue, 'remote_user', 'getRemoteUser', $where, $whereParameters);
+        $this->addWhere($queue, 'remote_password', 'getRemotePassword', $where, $whereParameters);
+        $this->addWhere($queue, 'local_path', 'getLocalPath', $where, $whereParameters);
+        $this->addWhere($queue, 'remote_path', 'getRemotePath', $where, $whereParameters);
+        $this->addWhere($queue, 'direction', 'getDirection', $where, $whereParameters);
+
+        $count = $this->getAggregate(
+            'COUNT(`id`)',
+            implode(' AND ', $where),
+            $whereParameters,
+            Queue::class
+        );
+
+        return !empty($count) && $count[0] > 0;
+    }
+
+    private function addWhere(Queue $queue, string $fieldName, string $getterName, array &$where, array &$whereParameters): void
+    {
+        $value = $queue->$getterName();
+
+        if ($value === null) {
+            return;
+        }
+
+        $where[] = '`' . $fieldName . '`=?';
+        $whereParameters[] = $value;
+    }
 }

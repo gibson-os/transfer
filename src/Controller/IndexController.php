@@ -14,6 +14,7 @@ use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
+use GibsonOS\Module\Transfer\Exception\QueueException;
 use GibsonOS\Module\Transfer\Service\ClientCryptService;
 use GibsonOS\Module\Transfer\Service\ClientService;
 use GibsonOS\Module\Transfer\Service\QueueService;
@@ -134,6 +135,7 @@ class IndexController extends AbstractController
      * @throws FactoryError
      * @throws SelectError
      * @throws SaveError
+     * @throws QueueException
      */
     #[CheckPermission(Permission::READ)]
     public function download(
@@ -142,8 +144,10 @@ class IndexController extends AbstractController
         string $localPath,
         string $dir,
         array $files = null,
-        bool $overwrite = false,
-        bool $ignore = false,
+        bool $overwriteAll = false,
+        array $overwrite = [],
+        bool $ignoreAll = false,
+        array $ignore = [],
         int $id = null,
         string $protocol = null,
         string $url = null,
@@ -157,7 +161,9 @@ class IndexController extends AbstractController
             $localPath,
             $dir,
             $files,
+            $overwriteAll,
             $overwrite,
+            $ignoreAll,
             $ignore,
             $id,
             $protocol,
@@ -187,8 +193,10 @@ class IndexController extends AbstractController
         string $remotePath,
         string $dir,
         array $files = null,
-        bool $overwrite = false,
-        bool $ignore = false,
+        bool $overwriteAll = false,
+        array $overwrite = [],
+        bool $ignoreAll = false,
+        array $ignore = [],
         bool $crypt = false,
         int $id = null,
         string $protocol = null,
@@ -204,7 +212,9 @@ class IndexController extends AbstractController
             $dir,
             $crypt,
             $files,
+            $overwriteAll,
             $overwrite,
+            $ignoreAll,
             $ignore,
             $id,
             $protocol,
