@@ -7,6 +7,7 @@ use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\FileExistsError;
 use GibsonOS\Core\Exception\Repository\SelectError;
+use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\DirService;
 use GibsonOS\Core\Service\FileService;
@@ -19,6 +20,7 @@ use GibsonOS\Module\Transfer\Repository\SessionRepository;
 class ClientService
 {
     public function __construct(
+        private CryptService $cryptService,
         private DirService $dirService,
         private FileService $fileService,
         private DateTimeService $dateTimeService,
@@ -173,15 +175,18 @@ class ClientService
         string $address = null,
         int $port = null,
         string $user = null,
-        string $password = null
+        string $password = null,
+        int $userId = null
     ): ClientInterface {
         if ($id !== null) {
-            $session = $this->sessionRepository->getById($id);
+            $session = $this->sessionRepository->getById($id, $userId);
             $protocol = $session->getProtocol();
             $address = $session->getUrl();
             $port = $session->getPort();
-            $user = $session->getRemoteUser();
-            $password = $session->getRemotePassword();
+            $remoteUser = $session->getRemoteUser();
+            $user = $remoteUser === null ? null : $this->cryptService->decrypt($remoteUser);
+            $remotePassword = $session->getRemotePassword();
+            $password = $remotePassword === null ? null : $this->cryptService->decrypt($remotePassword);
         }
 
         if ($protocol === null) {

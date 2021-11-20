@@ -15,6 +15,7 @@ use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 use GibsonOS\Module\Transfer\Exception\QueueException;
+use GibsonOS\Module\Transfer\Repository\SessionRepository;
 use GibsonOS\Module\Transfer\Service\ClientCryptService;
 use GibsonOS\Module\Transfer\Service\ClientService;
 use GibsonOS\Module\Transfer\Service\QueueService;
@@ -33,6 +34,7 @@ class IndexController extends AbstractController
      */
     #[CheckPermission(Permission::READ)]
     public function read(
+        SessionRepository $sessionRepository,
         DirStore $dirStore,
         ClientService $clientService,
         ClientCryptService $clientCryptService,
@@ -44,7 +46,12 @@ class IndexController extends AbstractController
         string $password = null,
         string $dir = null
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password);
+        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
+
+        if ($id !== null && $dir === null) {
+            $session = $sessionRepository->getById($id, $this->sessionService->getUserId());
+            $dir = $session->getRemotePath();
+        }
 
         $encryptedPath = explode('/', $dir === null ? '' : mb_substr($dir, 0, -1));
         $decryptedPath = [];
@@ -108,7 +115,7 @@ class IndexController extends AbstractController
         string $dir = null,
         string $node = null
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password);
+        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
         $loadParents = false;
 
         if ($node === 'root') {
@@ -155,7 +162,7 @@ class IndexController extends AbstractController
         string $user = null,
         string $password = null
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password);
+        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
         $queueService->addDownload(
             $client,
             $localPath,
@@ -185,6 +192,7 @@ class IndexController extends AbstractController
      * @throws SaveError
      * @throws SelectError
      * @throws GetError
+     * @throws QueueException
      */
     #[CheckPermission(Permission::WRITE)]
     public function upload(
@@ -205,7 +213,7 @@ class IndexController extends AbstractController
         string $user = null,
         string $password = null
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password);
+        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
         $queueService->addUpload(
             $client,
             $remotePath,
@@ -268,7 +276,7 @@ class IndexController extends AbstractController
         string $user = null,
         string $password = null
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password);
+        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
         $dir = $clientService->createDir(
             $client,
             $dir,
@@ -299,7 +307,7 @@ class IndexController extends AbstractController
         string $user = null,
         string $password = null,
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password);
+        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
         $clientService->delete($client, $dir, $files);
         $client->disconnect();
 
