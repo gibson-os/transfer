@@ -3,7 +3,7 @@ Ext.define('GibsonOS.module.transfer.session.Window', {
     alias: ['widget.gosModuleTransferSessionWindow'],
     title: 'Verbindungen',
     width: 500,
-    height: 295,
+    height: 300,
     layout: 'border',
     requiredPermission: {
         module: 'transfer',

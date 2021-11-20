@@ -199,6 +199,7 @@ class Session extends AbstractModel implements JsonSerializable, AutoCompleteMod
             'port' => $this->getPort(),
             'remotePath' => $this->getRemotePath(),
             'localPath' => $this->getLocalPath(),
+            'onlyForThisUser' => $this->getUserId() !== null,
         ];
     }
 

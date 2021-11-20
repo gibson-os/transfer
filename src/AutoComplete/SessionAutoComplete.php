@@ -28,7 +28,7 @@ class SessionAutoComplete implements AutoCompleteInterface
      */
     public function getById(string $id, array $parameters): AutoCompleteModelInterface
     {
-        return $this->sessionRepository->getById((int) $id);
+        return $this->sessionRepository->getById((int) $id, $this->sessionService->getUserId());
     }
 
     public function getModel(): string

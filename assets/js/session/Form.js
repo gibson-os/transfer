@@ -20,16 +20,17 @@ Ext.define('GibsonOS.module.transfer.session.Form', {
             fieldLabel: 'Name'
         },{
             xtype: 'gosModuleCoreParameterTypeAutoComplete',
-            name: 'client',
+            name: 'protocol',
+            fieldLabel: 'Protokoll',
             valueField: 'className',
+            displayField: 'name',
             parameterObject: {
                 config: {
                     model: 'GibsonOS.module.transfer.session.model.Client',
-                    autoCompleteClassname: 'GibsonOS\\Module\\Transfer\\AutoComplete\\SessionAutoComplete',
+                    autoCompleteClassname: 'GibsonOS\\Module\\Transfer\\AutoComplete\\ClientAutoComplete',
                     parameters: {}
                 }
-            },
-            value: 'transfer'
+            }
         },{
             xtype: 'fieldcontainer',
             fieldLabel: 'URL',
@@ -102,7 +103,8 @@ Ext.define('GibsonOS.module.transfer.session.Form', {
                                 id: me.getForm().findField('id').getValue(),
                                 url: me.getForm().findField('url').getValue(),
                                 port: me.getForm().findField('port').getValue(),
-                                protocol: me.getForm().findField('protocol').getValue(),
+                                // @todo protocol hat falsches model und deswegen ist value immer null
+                                protocol: me.getForm().findField('protocol').valueModels[0].raw.className,
                                 user: me.getForm().findField('user').getValue(),
                                 password: me.getForm().findField('password').getValue()
                             }
@@ -134,6 +136,10 @@ Ext.define('GibsonOS.module.transfer.session.Form', {
                 me.getForm().submit({
                     xtype: 'gosFormActionAction',
                     url: baseDir + 'transfer/session/save',
+                    params: {
+                        // @todo protocol hat falsches model und deswegen ist value immer null
+                        clientClass: me.getForm().findField('protocol').valueModels[0].raw.className
+                    },
                     success: function(form, action) {
                         var data = Ext.decode(action.response.responseText).data;
 

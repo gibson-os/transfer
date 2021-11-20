@@ -12,9 +12,17 @@ class SessionRepository extends AbstractRepository
     /**
      * @throws SelectError
      */
-    public function getById(int $id): Session
+    public function getById(int $id, int $userId = null): Session
     {
-        return $this->fetchOne('`id`=?', [$id], Session::class);
+        $userWhere = '';
+        $whereParameters = [$id];
+
+        if ($userId !== null) {
+            $userWhere = ' AND (`user_id` IS NULL OR `user_id`=?)';
+            $whereParameters[] = $userId;
+        }
+
+        return $this->fetchOne('`id`=?' . $userWhere, $whereParameters, Session::class);
     }
 
     /**

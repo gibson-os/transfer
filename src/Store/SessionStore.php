@@ -3,12 +3,19 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Store;
 
+use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Store\AbstractDatabaseStore;
 use GibsonOS\Module\Transfer\Model\Session;
+use mysqlDatabase;
 
 class SessionStore extends AbstractDatabaseStore
 {
     private ?int $userId = null;
+
+    public function __construct(private CryptService $cryptService, mysqlDatabase $database = null)
+    {
+        parent::__construct($database);
+    }
 
     protected function getModelClassName(): string
     {
@@ -31,6 +38,18 @@ class SessionStore extends AbstractDatabaseStore
     protected function getDefaultOrder(): string
     {
         return '`name`';
+    }
+
+    public function getList(): iterable
+    {
+        /** @var Session $session */
+        foreach (parent::getList() as $session) {
+            $data = $session->jsonSerialize();
+            $user = $session->getRemoteUser();
+            $data['user'] = $user === null ? null : $this->cryptService->decrypt($user);
+
+            yield $data;
+        }
     }
 
     public function setUserId(?int $userId): SessionStore
