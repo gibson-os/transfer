@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dfe442339616fe69c548e251df92fa0d",
+    "content-hash": "f736226221237114eecad1b020d2cfab",
     "packages": [
         {
             "name": "gibson-os/core",
@@ -82,6 +82,72 @@
                 ]
             },
             "time": "2021-11-19T12:52:36+00:00"
+        },
+        {
+            "name": "gibson-os/explorer",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@wolli.dyndns.tv:/home/git/gibsonOs/Explorer.git",
+                "reference": "32d34d28e38a04514a48f7b1285c440de00a50fb"
+            },
+            "require": {
+                "ext-exif": "*",
+                "ext-iconv": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "ext-sqlite3": "*",
+                "gibson-os/core": "dev-master",
+                "mdo/mdo": "dev-master",
+                "php": " ^8.0"
+            },
+            "require-dev": {
+                "captainhook/captainhook": "^5.0",
+                "captainhook/plugin-composer": "^5.0",
+                "codeception/codeception": "^4.0",
+                "codeception/module-asserts": "^1.3",
+                "friendsofphp/php-cs-fixer": "^3.0",
+                "phpmd/phpmd": "^2.7",
+                "rector/rector": "^0.11.57",
+                "vimeo/psalm": "^4.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "GibsonOS\\Module\\Explorer\\": "src/"
+                }
+            },
+            "scripts": {
+                "fix": [
+                    "@php-cs"
+                ],
+                "test": [
+                    "@php-cs-dry",
+                    "@php-psalm",
+                    "@php-md",
+                    "@php-unit"
+                ],
+                "php-cs": [
+                    "php ./vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix src --verbose"
+                ],
+                "php-cs-dry": [
+                    "php ./vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix src --verbose --dry-run"
+                ],
+                "php-psalm": [
+                    "php ./vendor/vimeo/psalm/psalm"
+                ],
+                "php-md": [
+                    "php ./vendor/phpmd/phpmd/src/bin/phpmd src text ruleset.xml"
+                ],
+                "php-unit": [
+                    "php ./vendor/codeception/codeception/codecept run unit --ext DotReporter"
+                ],
+                "php-unit-add": [
+                    "php ./vendor/codeception/codeception/codecept generate:test unit"
+                ]
+            },
+            "time": "2021-11-19T09:19:46+00:00"
         },
         {
             "name": "mdo/mdo",
@@ -2964,16 +3030,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "9.2.8",
+            "version": "9.2.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "cf04e88a2e3c56fc1a65488afd493325b4c1bc3e"
+                "reference": "f301eb1453c9e7a1bc912ee8b0ea9db22c60223b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/cf04e88a2e3c56fc1a65488afd493325b4c1bc3e",
-                "reference": "cf04e88a2e3c56fc1a65488afd493325b4c1bc3e",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/f301eb1453c9e7a1bc912ee8b0ea9db22c60223b",
+                "reference": "f301eb1453c9e7a1bc912ee8b0ea9db22c60223b",
                 "shasum": ""
             },
             "require": {
@@ -3029,7 +3095,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.8"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.9"
             },
             "funding": [
                 {
@@ -3037,7 +3103,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-10-30T08:01:38+00:00"
+            "time": "2021-11-19T15:21:02+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -6997,15 +7063,14 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "mdo/mdo": 20,
-        "gibson-os/core": 20
+        "gibson-os/core": 20,
+        "gibson-os/explorer": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": " ^8.0",
         "ext-mbstring": "*",
-        "ext-exif": "*",
-        "ext-sqlite3": "*",
         "ext-json": "*",
         "ext-iconv": "*",
         "ext-ssh2": "*",

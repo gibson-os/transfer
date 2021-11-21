@@ -16,6 +16,9 @@ class Session extends AbstractModel implements JsonSerializable, AutoCompleteMod
 
     private string $url;
 
+    /**
+     * @var class-string
+     */
     private string $protocol;
 
     private int $port = 0;

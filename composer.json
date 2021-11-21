@@ -4,9 +4,8 @@
         "php": " ^8.0",
         "mdo/mdo": "dev-master",
         "gibson-os/core": "dev-master",
+        "gibson-os/explorer": "dev-master",
         "ext-mbstring": "*",
-        "ext-exif": "*",
-        "ext-sqlite3": "*",
         "ext-json": "*",
         "ext-iconv": "*",
         "ext-ssh2": "*",
@@ -31,6 +30,10 @@
         {
             "type": "vcs",
             "url": "git@wolli.dyndns.tv:/home/git/gibsonOs/Core.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@wolli.dyndns.tv:/home/git/gibsonOs/Explorer.git"
         }
     ],
     "autoload": {
