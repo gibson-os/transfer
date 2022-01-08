@@ -7,6 +7,7 @@ use GibsonOS\Core\Command\AbstractCommand;
 use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\FileExistsError;
+use GibsonOS\Core\Exception\FileNotFound;
 use GibsonOS\Core\Exception\Model\SaveError;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Module\Transfer\Exception\ClientException;
@@ -35,21 +36,22 @@ class TransferCommand extends AbstractCommand
      * @throws FactoryError
      * @throws FileExistsError
      * @throws CreateError
+     * @throws FileNotFound
      */
     protected function run(): int
     {
         if ($this->queueRepository->countByStatus(Queue::STATUS_ACTIVE) >= 10) {
-            return 1;
+            return self::ERROR;
         }
 
         try {
             $queue = $this->queueRepository->getNextByStatus(Queue::STATUS_WAIT);
         } catch (SelectError) {
-            return 0;
+            return self::SUCCESS;
         }
 
         $this->queueService->handle($queue);
 
-        return 0;
+        return self::SUCCESS;
     }
 }
