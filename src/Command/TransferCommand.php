@@ -15,6 +15,9 @@ use GibsonOS\Module\Transfer\Repository\QueueRepository;
 use GibsonOS\Module\Transfer\Service\QueueService;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @description Down- and upload queued files
+ */
 class TransferCommand extends AbstractCommand
 {
     public function __construct(
