@@ -5,11 +5,14 @@ namespace GibsonOS\Module\Transfer\Model;
 
 use DateTimeImmutable;
 use DateTimeInterface;
+use GibsonOS\Core\Attribute\Install\Database\Column;
+use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\User;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use mysqlDatabase;
 
+#[Table]
 class Queue extends AbstractModel implements \JsonSerializable
 {
     public const STATUS_ERROR = 'error';
@@ -24,51 +27,72 @@ class Queue extends AbstractModel implements \JsonSerializable
 
     public const DIRECTION_UPLOAD = 'upload';
 
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED], autoIncrement: true)]
     private ?int $id = null;
 
+    #[Column(length: 512)]
     private string $localPath;
 
+    #[Column(length: 512)]
     private string $remotePath;
 
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private int $size = 0;
 
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private int $transferred = 0;
 
+    #[Column(type: Column::TYPE_ENUM, values: ['error', 'wait', 'active', 'finished'])]
     private string $status = self::STATUS_WAIT;
 
+    #[Column(type: Column::TYPE_ENUM, values: ['download', 'upload'])]
     private string $direction = self::DIRECTION_DOWNLOAD;
 
+    #[Column]
     private bool $overwrite = false;
 
+    #[Column]
     private bool $crypt = false;
 
+    #[Column(type: Column::TYPE_TEXT)]
     private ?string $url = null;
 
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private ?int $port = null;
 
     /**
      * @var class-string<ClientInterface>|null
      */
+    #[Column(length: 255)]
     private ?string $protocol = null;
 
+    #[Column(length: 255)]
     private ?string $remoteUser = null;
 
+    #[Column(length: 255)]
     private ?string $remotePassword = null;
 
+    #[Column(type: Column::TYPE_TEXT)]
     private ?string $message = null;
 
+    #[Column]
     private ?DateTimeInterface $cryptDate = null;
 
+    #[Column]
     private ?DateTimeInterface $start = null;
 
+    #[Column]
     private ?DateTimeInterface $end = null;
 
+    #[Column(default: Column::DEFAULT_CURRENT_TIMESTAMP)]
     private DateTimeInterface $added;
 
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private ?int $sessionId = null;
 
     private ?Session $session = null;
 
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private ?int $userId = null;
 
     private ?User $user = null;

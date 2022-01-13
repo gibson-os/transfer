@@ -3,36 +3,50 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Model;
 
+use GibsonOS\Core\Attribute\Install\Database\Column;
+use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\AutoCompleteModelInterface;
 use GibsonOS\Core\Model\User;
 use JsonSerializable;
 
+#[Table]
 class Session extends AbstractModel implements JsonSerializable, AutoCompleteModelInterface
 {
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED], autoIncrement: true)]
     private ?int $id = null;
 
+    #[Column(length: 64)]
     private string $name;
 
+    #[Column(type: Column::TYPE_TEXT)]
     private string $url;
 
     /**
      * @var class-string
      */
+    #[Column(length: 255)]
     private string $protocol;
 
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private int $port = 0;
 
+    #[Column(length: 255)]
     private ?string $remoteUser = null;
 
+    #[Column(length: 255)]
     private ?string $remotePassword = null;
 
+    #[Column(length: 512)]
     private ?string $localPath = null;
 
+    #[Column(length: 512)]
     private ?string $remotePath = null;
 
+    #[Column(type: Column::TYPE_TEXT)]
     private ?string $data = null;
 
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private ?int $userId = null;
 
     private ?User $user = null;
