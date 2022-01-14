@@ -4,12 +4,16 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Transfer\Model;
 
 use GibsonOS\Core\Attribute\Install\Database\Column;
+use GibsonOS\Core\Attribute\Install\Database\Constraint;
 use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\AutoCompleteModelInterface;
 use GibsonOS\Core\Model\User;
 use JsonSerializable;
 
+/**
+ * @method ?User getUser()
+ */
 #[Table]
 class Session extends AbstractModel implements JsonSerializable, AutoCompleteModelInterface
 {
@@ -49,12 +53,8 @@ class Session extends AbstractModel implements JsonSerializable, AutoCompleteMod
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private ?int $userId = null;
 
-    private ?User $user = null;
-
-    public static function getTableName(): string
-    {
-        return 'transfer_session';
-    }
+    #[Constraint]
+    protected ?User $user = null;
 
     public function getName(): string
     {
@@ -192,11 +192,6 @@ class Session extends AbstractModel implements JsonSerializable, AutoCompleteMod
         $this->userId = $userId;
 
         return $this;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
     }
 
     public function setUser(?User $user): Session
