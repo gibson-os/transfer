@@ -31,10 +31,10 @@ class Session extends AbstractModel implements JsonSerializable, AutoCompleteMod
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private int $port = 0;
 
-    #[Column(length: 255)]
+    #[Column(length: 512)]
     private ?string $remoteUser = null;
 
-    #[Column(length: 255)]
+    #[Column(length: 512)]
     private ?string $remotePassword = null;
 
     #[Column(length: 512)]

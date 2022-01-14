@@ -66,10 +66,10 @@ class Queue extends AbstractModel implements \JsonSerializable
     #[Column(length: 255)]
     private ?string $protocol = null;
 
-    #[Column(length: 255)]
+    #[Column(length: 512)]
     private ?string $remoteUser = null;
 
-    #[Column(length: 255)]
+    #[Column(length: 512)]
     private ?string $remotePassword = null;
 
     #[Column(type: Column::TYPE_TEXT)]
@@ -84,7 +84,7 @@ class Queue extends AbstractModel implements \JsonSerializable
     #[Column]
     private ?DateTimeInterface $end = null;
 
-    #[Column(default: Column::DEFAULT_CURRENT_TIMESTAMP)]
+    #[Column(type: Column::TYPE_TIMESTAMP, default: Column::DEFAULT_CURRENT_TIMESTAMP)]
     private DateTimeInterface $added;
 
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
