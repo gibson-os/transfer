@@ -12,7 +12,8 @@ use GibsonOS\Core\Model\User;
 use JsonSerializable;
 
 /**
- * @method ?User getUser()
+ * @method User|null getUser()
+ * @method           setUser(?User $user)
  */
 #[Table]
 class Session extends AbstractModel implements JsonSerializable, AutoCompleteModelInterface
@@ -190,13 +191,6 @@ class Session extends AbstractModel implements JsonSerializable, AutoCompleteMod
     public function setUserId(?int $userId): Session
     {
         $this->userId = $userId;
-
-        return $this;
-    }
-
-    public function setUser(?User $user): Session
-    {
-        $this->user = $user;
 
         return $this;
     }

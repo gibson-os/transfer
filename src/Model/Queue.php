@@ -6,14 +6,20 @@ namespace GibsonOS\Module\Transfer\Model;
 use DateTimeImmutable;
 use DateTimeInterface;
 use GibsonOS\Core\Attribute\Install\Database\Column;
+use GibsonOS\Core\Attribute\Install\Database\Constraint;
 use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\User;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
+use JsonSerializable;
 use mysqlDatabase;
 
+/**
+ * @method User|null getUser()
+ * @method           setUser(?User $user)
+ */
 #[Table]
-class Queue extends AbstractModel implements \JsonSerializable
+class Queue extends AbstractModel implements JsonSerializable
 {
     public const STATUS_ERROR = 'error';
 
@@ -95,18 +101,14 @@ class Queue extends AbstractModel implements \JsonSerializable
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private ?int $userId = null;
 
-    private ?User $user = null;
+    #[Constraint]
+    protected ?User $user = null;
 
     public function __construct(mysqlDatabase $database = null)
     {
         parent::__construct($database);
 
         $this->added = new DateTimeImmutable();
-    }
-
-    public static function getTableName(): string
-    {
-        return 'transfer_queue';
     }
 
     public function getLocalPath(): string
@@ -375,18 +377,6 @@ class Queue extends AbstractModel implements \JsonSerializable
     public function setUserId(?int $userId): Queue
     {
         $this->userId = $userId;
-
-        return $this;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): Queue
-    {
-        $this->user = $user;
 
         return $this;
     }
