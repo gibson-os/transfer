@@ -96,6 +96,7 @@ class Queue extends AbstractModel implements JsonSerializable
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private ?int $sessionId = null;
 
+    #[Constraint]
     private ?Session $session = null;
 
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]

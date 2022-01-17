@@ -5,6 +5,7 @@ namespace GibsonOS\Module\Transfer\Model;
 
 use GibsonOS\Core\Attribute\Install\Database\Column;
 use GibsonOS\Core\Attribute\Install\Database\Constraint;
+use GibsonOS\Core\Attribute\Install\Database\Key;
 use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\AutoCompleteModelInterface;
@@ -22,6 +23,7 @@ class Session extends AbstractModel implements JsonSerializable, AutoCompleteMod
     private ?int $id = null;
 
     #[Column(length: 64)]
+    #[Key(true)]
     private string $name;
 
     #[Column(type: Column::TYPE_TEXT)]
