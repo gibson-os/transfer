@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Store;
 
-use GibsonOS\Core\Service\AttributeService;
 use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Store\AbstractDatabaseStore;
 use GibsonOS\Module\Transfer\Model\Session;
@@ -15,10 +14,9 @@ class SessionStore extends AbstractDatabaseStore
 
     public function __construct(
         private CryptService $cryptService,
-        AttributeService $attributeService,
         mysqlDatabase $database = null
     ) {
-        parent::__construct($attributeService, $database);
+        parent::__construct($database);
     }
 
     protected function getModelClassName(): string
