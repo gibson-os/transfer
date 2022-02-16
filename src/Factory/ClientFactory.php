@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Transfer\Factory;
 
 use GibsonOS\Core\Exception\FactoryError;
-use GibsonOS\Core\Service\ServiceManagerService;
+use GibsonOS\Core\Manager\ServiceManager;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 
 class ClientFactory
 {
-    public function __construct(private ServiceManagerService $serviceManagerService)
+    public function __construct(private ServiceManager $serviceManager)
     {
     }
 
@@ -20,7 +20,7 @@ class ClientFactory
      */
     public function get(string $clientClassName): ClientInterface
     {
-        $client = $this->serviceManagerService->get($clientClassName);
+        $client = $this->serviceManager->get($clientClassName);
 
         if (!$client instanceof ClientInterface) {
             throw new FactoryError(sprintf(
