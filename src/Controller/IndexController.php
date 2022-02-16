@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Transfer\Controller;
 
 use GibsonOS\Core\Attribute\CheckPermission;
+use GibsonOS\Core\Attribute\GetModel;
 use GibsonOS\Core\Controller\AbstractController;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\GetError;
@@ -15,7 +16,7 @@ use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 use GibsonOS\Module\Transfer\Exception\QueueException;
-use GibsonOS\Module\Transfer\Repository\SessionRepository;
+use GibsonOS\Module\Transfer\Model\Session;
 use GibsonOS\Module\Transfer\Service\ClientCryptService;
 use GibsonOS\Module\Transfer\Service\ClientService;
 use GibsonOS\Module\Transfer\Service\QueueService;
@@ -34,11 +35,10 @@ class IndexController extends AbstractController
      */
     #[CheckPermission(Permission::READ)]
     public function read(
-        SessionRepository $sessionRepository,
         DirStore $dirStore,
         ClientService $clientService,
         ClientCryptService $clientCryptService,
-        int $id = null,
+        #[GetModel] Session $session = null,
         string $protocol = null,
         string $url = null,
         int $port = null,
@@ -46,10 +46,9 @@ class IndexController extends AbstractController
         string $password = null,
         string $dir = null
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
+        $client = $clientService->connect($session?->getId(), $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
 
-        if ($id !== null && $dir === null) {
-            $session = $sessionRepository->getById($id, $this->sessionService->getUserId());
+        if ($session !== null && $dir === null) {
             $dir = $session->getRemotePath();
         }
 
