@@ -4,12 +4,13 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Transfer\Controller;
 
 use GibsonOS\Core\Attribute\CheckPermission;
+use GibsonOS\Core\Attribute\GetMappedModel;
 use GibsonOS\Core\Attribute\GetModel;
 use GibsonOS\Core\Controller\AbstractController;
 use GibsonOS\Core\Exception\FactoryError;
-use GibsonOS\Core\Exception\Model\DeleteError;
 use GibsonOS\Core\Exception\Model\SaveError;
 use GibsonOS\Core\Exception\Repository\SelectError;
+use GibsonOS\Core\Manager\ModelManager;
 use GibsonOS\Core\Model\User\Permission;
 use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\PermissionService;
@@ -17,6 +18,8 @@ use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Module\Transfer\Factory\ClientFactory;
 use GibsonOS\Module\Transfer\Model\Session;
 use GibsonOS\Module\Transfer\Store\SessionStore;
+use JsonException;
+use ReflectionException;
 
 class SessionController extends AbstractController
 {
@@ -41,56 +44,42 @@ class SessionController extends AbstractController
     }
 
     /**
-     * @param class-string $clientClass
-     *
      * @throws FactoryError
      * @throws SaveError
+     * @throws JsonException
+     * @throws ReflectionException
      */
     #[CheckPermission(Permission::WRITE)]
     public function save(
         ClientFactory $clientFactory,
         CryptService $cryptService,
         PermissionService $permissionService,
+        ModelManager $modelManager,
         int $userPermission,
-        string $name,
-        string $clientClass,
-        string $url,
-        int $port = null,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'protocol' => 'clientClass'])] Session $session,
         string $user = null,
         string $password = null,
-        string $localPath = null,
-        string $remotePath = null,
-        bool $onlyForThisUser = false,
-        #[GetModel] Session $session = null
+        int $port = null,
+        bool $onlyForThisUser = false
     ): AjaxResponse {
-        if ($session !== null) {
-            if (
-                $session->getUserId() === null &&
-                !$permissionService->checkPermission(Permission::MANAGE, $userPermission)
-            ) {
-                return $this->returnFailure(sprintf(
-                    'Keine Berechtigung um die Session %s zu bearbeiten!',
-                    $session->getName()
-                ));
-            }
-        } else {
-            $session = new Session();
+        $userId = $session->getUserId();
+
+        if (
+            ($userId === null && !$permissionService->checkPermission(Permission::MANAGE, $userPermission)) ||
+            ($userId !== null && $userId !== $this->sessionService->getUserId())
+        ) {
+            return $this->returnFailure(sprintf(
+                'Keine Berechtigung um die Session %s zu bearbeiten!',
+                $session->getName()
+            ));
         }
 
         if ($port === null) {
-            $client = $clientFactory->get($clientClass);
-            $port = $client->getDefaultPort();
+            $client = $clientFactory->get($session->getProtocol());
+            $session->setPort($client->getDefaultPort());
         }
 
-        $session
-            ->setName($name)
-            ->setProtocol($clientClass)
-            ->setUrl($url)
-            ->setPort($port)
-            ->setLocalPath($localPath)
-            ->setRemotePath($remotePath)
-            ->setUserId($onlyForThisUser ? $this->sessionService->getUserId() : null)
-        ;
+        $session->setUserId($onlyForThisUser ? $this->sessionService->getUserId() : null);
 
         if ($user !== null) {
             $session->setRemoteUser($cryptService->encrypt($user));
@@ -100,17 +89,20 @@ class SessionController extends AbstractController
             $session->setRemotePassword($cryptService->encrypt($password));
         }
 
-        $session->save();
+        $modelManager->save($session);
 
         return $this->returnSuccess($session);
     }
 
     /**
-     * @throws DeleteError
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws SaveError
      */
     #[CheckPermission(Permission::DELETE)]
     public function delete(
         PermissionService $permissionService,
+        ModelManager $modelManager,
         int $userPermission,
         #[GetModel] Session $session
     ): AjaxResponse {
@@ -124,7 +116,7 @@ class SessionController extends AbstractController
             ));
         }
 
-        $session->delete();
+        $modelManager->save($session);
 
         return $this->returnSuccess();
     }

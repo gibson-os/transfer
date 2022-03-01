@@ -10,6 +10,7 @@ use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\AutoCompleteModelInterface;
 use GibsonOS\Core\Model\User;
+use GibsonOS\Module\Transfer\Client\ClientInterface;
 use JsonSerializable;
 
 /**
@@ -30,7 +31,7 @@ class Session extends AbstractModel implements JsonSerializable, AutoCompleteMod
     private string $url;
 
     /**
-     * @var class-string
+     * @var class-string<ClientInterface>
      */
     #[Column(length: 255)]
     private string $protocol;
@@ -84,7 +85,7 @@ class Session extends AbstractModel implements JsonSerializable, AutoCompleteMod
     }
 
     /**
-     * @return class-string
+     * @return class-string<ClientInterface>
      */
     public function getProtocol(): string
     {
@@ -92,7 +93,7 @@ class Session extends AbstractModel implements JsonSerializable, AutoCompleteMod
     }
 
     /**
-     * @param class-string $protocol
+     * @param class-string<ClientInterface> $protocol
      */
     public function setProtocol(string $protocol): Session
     {
