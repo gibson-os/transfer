@@ -10,7 +10,7 @@ use GibsonOS\Core\Exception\FileExistsError;
 use GibsonOS\Core\Exception\FileNotFound;
 use GibsonOS\Core\Exception\GetError;
 use GibsonOS\Core\Exception\Model\SaveError;
-use GibsonOS\Core\Exception\Repository\SelectError;
+use GibsonOS\Core\Manager\ModelManager;
 use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\DirService;
@@ -21,7 +21,10 @@ use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 use GibsonOS\Module\Transfer\Exception\QueueException;
 use GibsonOS\Module\Transfer\Model\Queue;
+use GibsonOS\Module\Transfer\Model\Session;
 use GibsonOS\Module\Transfer\Repository\QueueRepository;
+use JsonException;
+use ReflectionException;
 
 class QueueService
 {
@@ -32,16 +35,19 @@ class QueueService
         private ClientCryptService $clientCryptService,
         private DateTimeService $dateTimeService,
         private ClientService $clientService,
-        private QueueRepository $queueRepository
+        private QueueRepository $queueRepository,
+        private ModelManager $modelManager
     ) {
     }
 
     /**
      * @param class-string<ClientInterface>|null $protocol
      *
-     * @throws SaveError
      * @throws ClientException
+     * @throws JsonException
      * @throws QueueException
+     * @throws ReflectionException
+     * @throws SaveError
      */
     public function addDownload(
         ClientInterface $client,
@@ -127,17 +133,19 @@ class QueueService
                 $this->throwOverwriteException($localItemPath, $overwrite, $ignore);
             }
 
-            $queue->save();
+            $this->modelManager->save($queue);
         }
     }
 
     /**
      * @param class-string<ClientInterface>|null $protocol
      *
-     * @throws SaveError
      * @throws ClientException
      * @throws GetError
+     * @throws JsonException
      * @throws QueueException
+     * @throws ReflectionException
+     * @throws SaveError
      */
     public function addUpload(
         ClientInterface $client,
@@ -228,45 +236,57 @@ class QueueService
                 $this->throwOverwriteException($decryptedRemoteItemPath, $overwrite, $ignore);
             }
 
-            $queue->save();
+            $this->modelManager->save($queue);
         }
     }
 
     /**
      * @throws ClientException
+     * @throws CreateError
      * @throws FactoryError
      * @throws FileExistsError
-     * @throws SaveError
-     * @throws SelectError
-     * @throws CreateError
      * @throws FileNotFound
+     * @throws SaveError
+     * @throws JsonException
+     * @throws ReflectionException
      */
     public function handle(Queue $queue): void
     {
-        $queue
-            ->setStatus(Queue::STATUS_ACTIVE)
-            ->setStart($this->dateTimeService->get())
-            ->save()
-        ;
-        $remoteUser = $queue->getRemoteUser();
-        $remotePassword = $queue->getRemotePassword();
+        $this->modelManager->save(
+            $queue
+                ->setStatus(Queue::STATUS_ACTIVE)
+                ->setStart($this->dateTimeService->get())
+        );
 
         try {
-            $client = $this->clientService->connect(
-                $queue->getSessionId(),
-                $queue->getProtocol(),
-                $queue->getUrl(),
-                $queue->getPort(),
-                $remoteUser === null ? null : $this->cryptService->decrypt($remoteUser),
-                $remotePassword === null ? null : $this->cryptService->decrypt($remotePassword),
+            $session = $queue->getSession();
+
+            if ($session === null) {
+                $protocol = $queue->getProtocol();
+                $url = $queue->getUrl();
+                $port = $queue->getPort();
+
+                if ($protocol === null || $url === null || $port === null) {
+                    throw new ClientException('Protocol, url or port not set!');
+                }
+
+                $session = (new Session())
+                    ->setProtocol($protocol)
+                    ->setUrl($url)
+                    ->setPort($port)
+                    ->setRemoteUser($queue->getRemoteUser())
+                    ->setRemotePassword($queue->getRemotePassword())
+                ;
+            }
+
+            $client = $this->clientService->connect($session);
+        } catch (FactoryError|ClientException $exception) {
+            $this->modelManager->save(
+                $queue
+                    ->setStatus(Queue::STATUS_ERROR)
+                    ->setMessage('Connection error!')
+                    ->setEnd($this->dateTimeService->get())
             );
-        } catch (FactoryError|SelectError|ClientException $exception) {
-            $queue
-                ->setStatus(Queue::STATUS_ERROR)
-                ->setMessage('Connection error!')
-                ->setEnd($this->dateTimeService->get())
-                ->save()
-            ;
 
             throw $exception;
         }
@@ -284,14 +304,14 @@ class QueueService
                 );
 
                 if ($queue->isCrypt()) {
-                    $queue->setCryptDate($this->dateTimeService->get())->save();
+                    $this->modelManager->save($queue->setCryptDate($this->dateTimeService->get()));
                     $this->clientCryptService->decryptFile($localPath);
                 }
             } else {
                 $encryptedPath = null;
 
                 if ($queue->isCrypt()) {
-                    $queue->setCryptDate($this->dateTimeService->get())->save();
+                    $this->modelManager->save($queue->setCryptDate($this->dateTimeService->get()));
                     $encryptedPath = $this->clientCryptService->encryptFile($localPath);
                 }
 
@@ -323,10 +343,7 @@ class QueueService
 
             throw $exception;
         } finally {
-            $queue
-                ->setEnd($this->dateTimeService->get())
-                ->save()
-            ;
+            $this->modelManager->save($queue->setEnd($this->dateTimeService->get()));
             $client->disconnect();
         }
     }

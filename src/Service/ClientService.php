@@ -6,7 +6,6 @@ namespace GibsonOS\Module\Transfer\Service;
 use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\FileExistsError;
-use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\DirService;
@@ -15,6 +14,7 @@ use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 use GibsonOS\Module\Transfer\Factory\ClientFactory;
+use GibsonOS\Module\Transfer\Model\Session;
 use GibsonOS\Module\Transfer\Repository\SessionRepository;
 
 class ClientService
@@ -163,38 +163,24 @@ class ClientService
     }
 
     /**
-     * @param class-string<ClientInterface>|null $protocol
-     *
      * @throws ClientException
      * @throws FactoryError
-     * @throws SelectError
      */
-    public function connect(
-        int $id = null,
-        string $protocol = null,
-        string $address = null,
-        int $port = null,
-        string $user = null,
-        string $password = null,
-        int $userId = null
-    ): ClientInterface {
-        if ($id !== null) {
-            $session = $this->sessionRepository->getById($id, $userId);
-            $protocol = $session->getProtocol();
-            $address = $session->getUrl();
-            $port = $session->getPort();
-            $remoteUser = $session->getRemoteUser();
-            $user = $remoteUser === null ? null : $this->cryptService->decrypt($remoteUser);
-            $remotePassword = $session->getRemotePassword();
-            $password = $remotePassword === null ? null : $this->cryptService->decrypt($remotePassword);
+    public function connect(Session $session, int $userId = null): ClientInterface
+    {
+        if ($session->getUserId() !== null && $session->getUserId() !== $userId) {
+            throw new ClientException('Session not allowed for user!');
         }
 
-        if ($protocol === null) {
-            throw new ClientException('No protocol set!');
-        }
-
-        $client = $this->clientFactory->get($protocol);
-        $client->connect($address ?? '', $user, $password, $port);
+        $client = $this->clientFactory->get($session->getProtocol());
+        $password = $session->getRemotePassword();
+        $user = $session->getRemoteUser();
+        $client->connect(
+            $session->getUrl(),
+            $user === null ? null : $this->cryptService->decrypt($user),
+            $password === null ? null : $this->cryptService->decrypt($password),
+            $session->getPort()
+        );
 
         return $client;
     }

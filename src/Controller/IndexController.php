@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Transfer\Controller;
 
 use GibsonOS\Core\Attribute\CheckPermission;
-use GibsonOS\Core\Attribute\GetModel;
+use GibsonOS\Core\Attribute\GetMappedModel;
 use GibsonOS\Core\Controller\AbstractController;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\GetError;
@@ -12,7 +12,6 @@ use GibsonOS\Core\Exception\Model\SaveError;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Model\User\Permission;
 use GibsonOS\Core\Service\Response\AjaxResponse;
-use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 use GibsonOS\Module\Transfer\Exception\QueueException;
@@ -27,31 +26,18 @@ use GibsonOS\Module\Transfer\Store\TransferStore;
 class IndexController extends AbstractController
 {
     /**
-     * @param class-string<ClientInterface>|null $protocol
-     *
      * @throws FactoryError
      * @throws ClientException
-     * @throws SelectError
      */
     #[CheckPermission(Permission::READ)]
     public function read(
         DirStore $dirStore,
         ClientService $clientService,
         ClientCryptService $clientCryptService,
-        #[GetModel] Session $session = null,
-        string $protocol = null,
-        string $url = null,
-        int $port = null,
-        string $user = null,
-        string $password = null,
-        string $dir = null
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session
     ): AjaxResponse {
-        $client = $clientService->connect($session?->getId(), $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
-
-        if ($session !== null && $dir === null) {
-            $dir = $session->getRemotePath();
-        }
-
+        $client = $clientService->connect($session, $this->sessionService->getUserId());
+        $dir = $session->getRemotePath();
         $encryptedPath = explode('/', $dir === null ? '' : mb_substr($dir, 0, -1));
         $decryptedPath = [];
 
@@ -95,27 +81,19 @@ class IndexController extends AbstractController
     }
 
     /**
-     * @param class-string<ClientInterface>|null $protocol
-     *
      * @throws ClientException
      * @throws FactoryError
-     * @throws SelectError
      */
     #[CheckPermission(Permission::READ)]
     public function dirList(
         ClientService $clientService,
         DirListStore $dirListStore,
-        int $id = null,
-        string $protocol = null,
-        string $url = null,
-        int $port = null,
-        string $user = null,
-        string $password = null,
-        string $dir = null,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session,
         string $node = null
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
+        $client = $clientService->connect($session, $this->sessionService->getUserId());
         $loadParents = false;
+        $dir = $session->getRemotePath();
 
         if ($node === 'root') {
             $loadParents = true;
@@ -135,11 +113,8 @@ class IndexController extends AbstractController
     }
 
     /**
-     * @param class-string<ClientInterface>|null $protocol
-     *
      * @throws ClientException
      * @throws FactoryError
-     * @throws SelectError
      * @throws SaveError
      * @throws QueueException
      */
@@ -149,19 +124,15 @@ class IndexController extends AbstractController
         QueueService $queueService,
         string $localPath,
         string $dir,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session,
         array $files = null,
         bool $overwriteAll = false,
         array $overwrite = [],
         bool $ignoreAll = false,
         array $ignore = [],
-        int $id = null,
-        string $protocol = null,
-        string $url = null,
-        int $port = null,
-        string $user = null,
-        string $password = null
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
+        $client = $clientService->connect($session, $this->sessionService->getUserId());
+
         $queueService->addDownload(
             $client,
             $localPath,
@@ -171,12 +142,12 @@ class IndexController extends AbstractController
             $overwrite,
             $ignoreAll,
             $ignore,
-            $id,
-            $protocol,
-            $url,
-            $port,
-            $user,
-            $password
+            $session->getId(),
+            $session->getProtocol(),
+            $session->getUrl(),
+            $session->getPort(),
+            $session->getRemoteUser(),
+            $session->getRemotePassword()
         );
         $client->disconnect();
 
@@ -184,12 +155,9 @@ class IndexController extends AbstractController
     }
 
     /**
-     * @param class-string<ClientInterface>|null $protocol
-     *
      * @throws ClientException
      * @throws FactoryError
      * @throws SaveError
-     * @throws SelectError
      * @throws GetError
      * @throws QueueException
      */
@@ -199,20 +167,16 @@ class IndexController extends AbstractController
         QueueService $queueService,
         string $remotePath,
         string $dir,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'localPath' => 'dir'])] Session $session,
         array $files = null,
         bool $overwriteAll = false,
         array $overwrite = [],
         bool $ignoreAll = false,
         array $ignore = [],
-        bool $crypt = false,
-        int $id = null,
-        string $protocol = null,
-        string $url = null,
-        int $port = null,
-        string $user = null,
-        string $password = null
+        bool $crypt = false
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
+        $client = $clientService->connect($session, $this->sessionService->getUserId());
+
         $queueService->addUpload(
             $client,
             $remotePath,
@@ -223,12 +187,12 @@ class IndexController extends AbstractController
             $overwrite,
             $ignoreAll,
             $ignore,
-            $id,
-            $protocol,
-            $url,
-            $port,
-            $user,
-            $password
+            $session->getId(),
+            $session->getProtocol(),
+            $session->getUrl(),
+            $session->getPort(),
+            $session->getRemoteUser(),
+            $session->getRemotePassword()
         );
         $client->disconnect();
 
@@ -255,11 +219,8 @@ class IndexController extends AbstractController
     }
 
     /**
-     * @param class-string<ClientInterface>|null $protocol
-     *
      * @throws ClientException
      * @throws FactoryError
-     * @throws SelectError
      */
     #[CheckPermission(Permission::WRITE)]
     public function addDir(
@@ -267,15 +228,10 @@ class IndexController extends AbstractController
         ClientCryptService $nameCryptService,
         string $dir,
         string $dirname,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session,
         bool $crypt = false,
-        int $id = null,
-        string $protocol = null,
-        string $url = null,
-        int $port = null,
-        string $user = null,
-        string $password = null
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
+        $client = $clientService->connect($session, $this->sessionService->getUserId());
         $dir = $clientService->createDir(
             $client,
             $dir,
@@ -288,25 +244,17 @@ class IndexController extends AbstractController
     }
 
     /**
-     * @param class-string<ClientInterface>|null $protocol
-     *
      * @throws ClientException
      * @throws FactoryError
-     * @throws SelectError
      */
     #[CheckPermission(Permission::DELETE)]
     public function delete(
         ClientService $clientService,
         string $dir,
-        array $files = null,
-        int $id = null,
-        string $protocol = null,
-        string $url = null,
-        int $port = null,
-        string $user = null,
-        string $password = null,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session,
+        array $files = null
     ): AjaxResponse {
-        $client = $clientService->connect($id, $protocol, $url, $port, $user, $password, $this->sessionService->getUserId());
+        $client = $clientService->connect($session, $this->sessionService->getUserId());
         $clientService->delete($client, $dir, $files);
         $client->disconnect();
 
