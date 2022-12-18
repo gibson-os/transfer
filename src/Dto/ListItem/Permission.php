@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Dto\ListItem;
 
-use JsonSerializable;
-
-class Permission implements JsonSerializable
+class Permission implements \JsonSerializable
 {
     public function __construct(
         private bool $read,

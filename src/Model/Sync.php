@@ -3,14 +3,11 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Model;
 
-use DateTimeImmutable;
-use DateTimeInterface;
 use GibsonOS\Core\Attribute\Install\Database\Column;
 use GibsonOS\Core\Attribute\Install\Database\Constraint;
 use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\User;
-use mysqlDatabase;
 
 /**
  * @method Session getSession()
@@ -52,10 +49,10 @@ class Sync extends AbstractModel
     private int $userId;
 
     #[Column(type: Column::TYPE_TIMESTAMP, default: Column::DEFAULT_CURRENT_TIMESTAMP)]
-    private DateTimeInterface $added;
+    private \DateTimeInterface $added;
 
     #[Column]
-    private ?DateTimeInterface $nextRun = null;
+    private ?\DateTimeInterface $nextRun = null;
 
     #[Constraint]
     protected Session $session;
@@ -63,11 +60,11 @@ class Sync extends AbstractModel
     #[Constraint]
     protected User $user;
 
-    public function __construct(mysqlDatabase $database = null)
+    public function __construct(\mysqlDatabase $database = null)
     {
         parent::__construct($database);
 
-        $this->added = new DateTimeImmutable();
+        $this->added = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -190,24 +187,24 @@ class Sync extends AbstractModel
         return $this;
     }
 
-    public function getAdded(): DateTimeImmutable|DateTimeInterface
+    public function getAdded(): \DateTimeImmutable|\DateTimeInterface
     {
         return $this->added;
     }
 
-    public function setAdded(DateTimeImmutable|DateTimeInterface $added): Sync
+    public function setAdded(\DateTimeImmutable|\DateTimeInterface $added): Sync
     {
         $this->added = $added;
 
         return $this;
     }
 
-    public function getNextRun(): ?DateTimeInterface
+    public function getNextRun(): ?\DateTimeInterface
     {
         return $this->nextRun;
     }
 
-    public function setNextRun(?DateTimeInterface $nextRun): Sync
+    public function setNextRun(?\DateTimeInterface $nextRun): Sync
     {
         $this->nextRun = $nextRun;
 

@@ -6,7 +6,6 @@ namespace GibsonOS\Module\Transfer\Store;
 use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Store\AbstractDatabaseStore;
 use GibsonOS\Module\Transfer\Model\Session;
-use mysqlDatabase;
 
 class SessionStore extends AbstractDatabaseStore
 {
@@ -14,7 +13,7 @@ class SessionStore extends AbstractDatabaseStore
 
     public function __construct(
         private CryptService $cryptService,
-        mysqlDatabase $database = null
+        \mysqlDatabase $database = null
     ) {
         parent::__construct($database);
     }

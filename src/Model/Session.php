@@ -11,14 +11,13 @@ use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\AutoCompleteModelInterface;
 use GibsonOS\Core\Model\User;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
-use JsonSerializable;
 
 /**
  * @method User|null getUser()
  * @method           setUser(?User $user)
  */
 #[Table]
-class Session extends AbstractModel implements JsonSerializable, AutoCompleteModelInterface
+class Session extends AbstractModel implements \JsonSerializable, AutoCompleteModelInterface
 {
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED], autoIncrement: true)]
     private ?int $id = null;

@@ -23,8 +23,6 @@ use GibsonOS\Module\Transfer\Exception\QueueException;
 use GibsonOS\Module\Transfer\Model\Queue;
 use GibsonOS\Module\Transfer\Model\Session;
 use GibsonOS\Module\Transfer\Repository\QueueRepository;
-use JsonException;
-use ReflectionException;
 
 class QueueService
 {
@@ -44,9 +42,9 @@ class QueueService
      * @param class-string<ClientInterface>|null $protocol
      *
      * @throws ClientException
-     * @throws JsonException
+     * @throws \JsonException
      * @throws QueueException
-     * @throws ReflectionException
+     * @throws \ReflectionException
      * @throws SaveError
      */
     public function addDownload(
@@ -142,9 +140,9 @@ class QueueService
      *
      * @throws ClientException
      * @throws GetError
-     * @throws JsonException
+     * @throws \JsonException
      * @throws QueueException
-     * @throws ReflectionException
+     * @throws \ReflectionException
      * @throws SaveError
      */
     public function addUpload(
@@ -247,8 +245,8 @@ class QueueService
      * @throws FileExistsError
      * @throws FileNotFound
      * @throws SaveError
-     * @throws JsonException
-     * @throws ReflectionException
+     * @throws \JsonException
+     * @throws \ReflectionException
      */
     public function handle(Queue $queue): void
     {
