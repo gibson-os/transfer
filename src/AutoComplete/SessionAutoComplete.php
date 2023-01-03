@@ -35,4 +35,14 @@ class SessionAutoComplete implements AutoCompleteInterface
     {
         return 'GibsonOS.module.transfer.session.model.Grid';
     }
+
+    public function getValueField(): string
+    {
+        return 'id';
+    }
+
+    public function getDisplayField(): string
+    {
+        return 'name';
+    }
 }

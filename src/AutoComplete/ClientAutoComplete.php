@@ -50,4 +50,14 @@ class ClientAutoComplete implements AutoCompleteInterface
     {
         return 'GibsonOS.module.transfer.session.model.Client';
     }
+
+    public function getValueField(): string
+    {
+        return 'className';
+    }
+
+    public function getDisplayField(): string
+    {
+        return 'name';
+    }
 }
