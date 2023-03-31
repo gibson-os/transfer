@@ -22,7 +22,9 @@
     },
     "autoload": {
         "psr-4": {
-            "GibsonOS\\Module\\Transfer\\": "src/"
+            "GibsonOS\\Module\\Transfer\\": "src/",
+            "GibsonOS\\Test\\Unit\\Transfer\\": "tests/unit/",
+            "GibsonOS\\Test\\Functional\\Transfer\\": "tests/functional/"
         }
     },
     "scripts": {

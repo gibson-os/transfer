@@ -3,19 +3,23 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Model;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use GibsonOS\Core\Attribute\Install\Database\Column;
 use GibsonOS\Core\Attribute\Install\Database\Constraint;
 use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Core\Model\User;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
+use JsonSerializable;
+use mysqlDatabase;
 
 /**
  * @method User|null getUser()
  * @method           setUser(?User $user)
  */
 #[Table]
-class Queue extends AbstractModel implements \JsonSerializable
+class Queue extends AbstractModel implements JsonSerializable
 {
     public const STATUS_ERROR = 'error';
 
@@ -78,16 +82,16 @@ class Queue extends AbstractModel implements \JsonSerializable
     private ?string $message = null;
 
     #[Column]
-    private ?\DateTimeInterface $cryptDate = null;
+    private ?DateTimeInterface $cryptDate = null;
 
     #[Column]
-    private ?\DateTimeInterface $start = null;
+    private ?DateTimeInterface $start = null;
 
     #[Column]
-    private ?\DateTimeInterface $end = null;
+    private ?DateTimeInterface $end = null;
 
     #[Column(type: Column::TYPE_TIMESTAMP, default: Column::DEFAULT_CURRENT_TIMESTAMP)]
-    private \DateTimeInterface $added;
+    private DateTimeInterface $added;
 
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private ?int $sessionId = null;
@@ -101,11 +105,11 @@ class Queue extends AbstractModel implements \JsonSerializable
     #[Constraint]
     protected ?User $user = null;
 
-    public function __construct(\mysqlDatabase $database = null)
+    public function __construct(mysqlDatabase $database = null)
     {
         parent::__construct($database);
 
-        $this->added = new \DateTimeImmutable();
+        $this->added = new DateTimeImmutable();
     }
 
     public function getLocalPath(): string
@@ -282,48 +286,48 @@ class Queue extends AbstractModel implements \JsonSerializable
         return $this;
     }
 
-    public function getCryptDate(): ?\DateTimeInterface
+    public function getCryptDate(): ?DateTimeInterface
     {
         return $this->cryptDate;
     }
 
-    public function setCryptDate(?\DateTimeInterface $cryptDate): Queue
+    public function setCryptDate(?DateTimeInterface $cryptDate): Queue
     {
         $this->cryptDate = $cryptDate;
 
         return $this;
     }
 
-    public function getStart(): ?\DateTimeInterface
+    public function getStart(): ?DateTimeInterface
     {
         return $this->start;
     }
 
-    public function setStart(?\DateTimeInterface $start): Queue
+    public function setStart(?DateTimeInterface $start): Queue
     {
         $this->start = $start;
 
         return $this;
     }
 
-    public function getEnd(): ?\DateTimeInterface
+    public function getEnd(): ?DateTimeInterface
     {
         return $this->end;
     }
 
-    public function setEnd(?\DateTimeInterface $end): Queue
+    public function setEnd(?DateTimeInterface $end): Queue
     {
         $this->end = $end;
 
         return $this;
     }
 
-    public function getAdded(): \DateTimeInterface
+    public function getAdded(): DateTimeInterface
     {
         return $this->added;
     }
 
-    public function setAdded(\DateTimeInterface $added): Queue
+    public function setAdded(DateTimeInterface $added): Queue
     {
         $this->added = $added;
 

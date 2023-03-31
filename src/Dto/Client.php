@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Transfer\Dto;
 
 use GibsonOS\Core\Model\AutoCompleteModelInterface;
+use JsonSerializable;
 
-class Client implements AutoCompleteModelInterface, \JsonSerializable
+class Client implements AutoCompleteModelInterface, JsonSerializable
 {
     public function __construct(private string $className)
     {

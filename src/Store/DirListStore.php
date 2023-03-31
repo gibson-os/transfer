@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Store;
 
+use Generator;
 use GibsonOS\Core\Store\AbstractStore;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Exception\ClientException;
@@ -83,7 +84,7 @@ class DirListStore extends AbstractStore
     /**
      * @throws ClientException
      */
-    private function getDirs(string $dir): \Generator
+    private function getDirs(string $dir): Generator
     {
         foreach ($this->clientService->getList($this->client, $dir, false) as $item) {
             yield [

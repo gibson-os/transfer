@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Dto;
 
+use DateTimeInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem\Permission;
+use JsonSerializable;
 
-class ListItem implements \JsonSerializable
+class ListItem implements JsonSerializable
 {
     public const TYPE_DIR = 'dir';
 
@@ -13,7 +15,7 @@ class ListItem implements \JsonSerializable
         private string $name,
         private string $decryptedName,
         private string $dir,
-        private \DateTimeInterface $modified,
+        private DateTimeInterface $modified,
         private int $size,
         private string $type,
         private ?Permission $owner = null,
@@ -37,7 +39,7 @@ class ListItem implements \JsonSerializable
         return $this->dir;
     }
 
-    public function getModified(): \DateTimeInterface
+    public function getModified(): DateTimeInterface
     {
         return $this->modified;
     }

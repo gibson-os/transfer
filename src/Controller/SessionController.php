@@ -18,6 +18,8 @@ use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Module\Transfer\Factory\ClientFactory;
 use GibsonOS\Module\Transfer\Model\Session;
 use GibsonOS\Module\Transfer\Store\SessionStore;
+use JsonException;
+use ReflectionException;
 
 class SessionController extends AbstractController
 {
@@ -44,8 +46,8 @@ class SessionController extends AbstractController
     /**
      * @throws FactoryError
      * @throws SaveError
-     * @throws \JsonException
-     * @throws \ReflectionException
+     * @throws JsonException
+     * @throws ReflectionException
      */
     #[CheckPermission(Permission::WRITE)]
     public function save(
@@ -93,8 +95,8 @@ class SessionController extends AbstractController
     }
 
     /**
-     * @throws \JsonException
-     * @throws \ReflectionException
+     * @throws JsonException
+     * @throws ReflectionException
      * @throws SaveError
      */
     #[CheckPermission(Permission::DELETE)]
