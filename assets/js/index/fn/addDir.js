@@ -17,7 +17,8 @@ GibsonOS.define('GibsonOS.module.transfer.index.fn.addDir', function(dir, sessio
         promptParameter: 'dirname',
         okText: 'Anlegen'
     },{
-        url: baseDir + 'transfer/index/addDir',
+        url: baseDir + 'transfer/index/dir',
+        method: 'POST',
         params: params,
         success: function(response) {
             if (success) {

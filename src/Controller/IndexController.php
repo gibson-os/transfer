@@ -6,11 +6,11 @@ namespace GibsonOS\Module\Transfer\Controller;
 use GibsonOS\Core\Attribute\CheckPermission;
 use GibsonOS\Core\Attribute\GetMappedModel;
 use GibsonOS\Core\Controller\AbstractController;
+use GibsonOS\Core\Enum\Permission;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\GetError;
 use GibsonOS\Core\Exception\Model\SaveError;
 use GibsonOS\Core\Exception\Repository\SelectError;
-use GibsonOS\Core\Model\User\Permission;
 use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
@@ -22,6 +22,8 @@ use GibsonOS\Module\Transfer\Service\QueueService;
 use GibsonOS\Module\Transfer\Store\DirListStore;
 use GibsonOS\Module\Transfer\Store\DirStore;
 use GibsonOS\Module\Transfer\Store\TransferStore;
+use JsonException;
+use ReflectionException;
 
 class IndexController extends AbstractController
 {
@@ -29,8 +31,8 @@ class IndexController extends AbstractController
      * @throws FactoryError
      * @throws ClientException
      */
-    #[CheckPermission(Permission::READ)]
-    public function read(
+    #[CheckPermission([Permission::READ])]
+    public function get(
         DirStore $dirStore,
         ClientService $clientService,
         ClientCryptService $clientCryptService,
@@ -84,8 +86,8 @@ class IndexController extends AbstractController
      * @throws ClientException
      * @throws FactoryError
      */
-    #[CheckPermission(Permission::READ)]
-    public function dirList(
+    #[CheckPermission([Permission::READ])]
+    public function getList(
         ClientService $clientService,
         DirListStore $dirListStore,
         #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session,
@@ -115,11 +117,13 @@ class IndexController extends AbstractController
     /**
      * @throws ClientException
      * @throws FactoryError
-     * @throws SaveError
      * @throws QueueException
+     * @throws SaveError
+     * @throws JsonException
+     * @throws ReflectionException
      */
-    #[CheckPermission(Permission::READ)]
-    public function download(
+    #[CheckPermission([Permission::READ])]
+    public function getDownload(
         ClientService $clientService,
         QueueService $queueService,
         string $localPath,
@@ -157,12 +161,14 @@ class IndexController extends AbstractController
     /**
      * @throws ClientException
      * @throws FactoryError
-     * @throws SaveError
      * @throws GetError
+     * @throws JsonException
      * @throws QueueException
+     * @throws ReflectionException
+     * @throws SaveError
      */
-    #[CheckPermission(Permission::WRITE)]
-    public function upload(
+    #[CheckPermission([Permission::WRITE])]
+    public function postUpload(
         ClientService $clientService,
         QueueService $queueService,
         string $remotePath,
@@ -200,10 +206,12 @@ class IndexController extends AbstractController
     }
 
     /**
+     * @throws JsonException
+     * @throws ReflectionException
      * @throws SelectError
      */
-    #[CheckPermission(Permission::READ)]
-    public function transfer(
+    #[CheckPermission([Permission::READ])]
+    public function getTransfer(
         TransferStore $transferStore,
         string $type,
         int $autoRefresh,
@@ -222,8 +230,8 @@ class IndexController extends AbstractController
      * @throws ClientException
      * @throws FactoryError
      */
-    #[CheckPermission(Permission::WRITE)]
-    public function addDir(
+    #[CheckPermission([Permission::WRITE])]
+    public function postDir(
         ClientService $clientService,
         ClientCryptService $nameCryptService,
         string $dir,
@@ -247,7 +255,7 @@ class IndexController extends AbstractController
      * @throws ClientException
      * @throws FactoryError
      */
-    #[CheckPermission(Permission::DELETE)]
+    #[CheckPermission([Permission::DELETE])]
     public function delete(
         ClientService $clientService,
         string $dir,

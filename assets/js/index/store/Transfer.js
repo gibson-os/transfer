@@ -8,6 +8,7 @@ Ext.define('GibsonOS.module.transfer.index.store.Transfer', {
         this.proxy = {
             type: 'gosDataProxyAjax',
             url: baseDir + 'transfer/index/transfer',
+            method: 'GET',
             extraParams: {
                 type: data.gos.data.type,
                 autoRefresh: -1

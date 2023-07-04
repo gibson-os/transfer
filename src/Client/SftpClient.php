@@ -192,8 +192,8 @@ class SftpClient implements ClientInterface
 
         while ($item = readdir($dirResource)) {
             if (
-                $item == '.' ||
-                $item == '..'
+                $item == '.'
+                || $item == '..'
             ) {
                 continue;
             }

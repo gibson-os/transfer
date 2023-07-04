@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Transfer\Service;
 
+use GibsonOS\Core\Enum\HttpStatusCode;
 use GibsonOS\Core\Exception\AbstractException;
 use GibsonOS\Core\Exception\CreateError;
 use GibsonOS\Core\Exception\FactoryError;
@@ -15,7 +16,6 @@ use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\DirService;
 use GibsonOS\Core\Service\FileService;
-use GibsonOS\Core\Utility\StatusCode;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
@@ -356,7 +356,7 @@ class QueueService
         $overwrite[] = $path;
         $ignore[] = $path;
 
-        throw (new QueueException(sprintf('Datei %s existiert bereits. Überschreiben?', $path), StatusCode::CONFLICT))
+        throw (new QueueException(sprintf('Datei %s existiert bereits. Überschreiben?', $path), HttpStatusCode::CONFLICT->value))
             ->setTitle('Datei überschreiben?')
             ->setType(AbstractException::QUESTION)
             ->addButton('Überschreiben', 'overwrite[]', $overwrite)

@@ -3,7 +3,8 @@ Ext.define('GibsonOS.module.transfer.index.store.Tree', {
     alias: ['store.gosModuleTransferIndexTreeStore'],
     proxy: {
         type: 'gosDataProxyAjax',
-        url: baseDir + 'transfer/index/dirList'
+        url: baseDir + 'transfer/index/list',
+        method: 'GET'
     },
     constructor: function(data) {
         this.callParent(arguments);

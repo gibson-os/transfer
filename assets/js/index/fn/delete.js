@@ -58,7 +58,8 @@ GibsonOS.define('GibsonOS.module.transfer.index.fn.delete', function(dir, record
             text: 'Nein'
         }]
     },{
-        url: baseDir + 'transfer/index/delete',
+        url: baseDir + 'transfer/index',
+        method: 'DELETE',
         params: params,
         success: function(response) {
             if (success) {

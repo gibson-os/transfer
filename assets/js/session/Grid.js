@@ -49,7 +49,8 @@ Ext.define('GibsonOS.module.transfer.session.Grid', {
                         text: 'Ja',
                         handler: function () {
                             GibsonOS.Ajax.request({
-                                url: baseDir + 'transfer/session/delete',
+                                url: baseDir + 'transfer/session',
+                                method: 'DELETE',
                                 params: {
                                     id: record.get('id')
                                 },

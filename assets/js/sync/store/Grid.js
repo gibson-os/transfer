@@ -6,7 +6,8 @@ Ext.define('GibsonOS.module.transfer.sync.store.Grid', {
     constructor: function(data) {
         this.proxy = {
             type: 'gosDataProxyAjax',
-            url: baseDir + 'transfer/sync/index'
+            url: baseDir + 'transfer/sync',
+            method: 'GET'
         };
 
         this.callParent(arguments);

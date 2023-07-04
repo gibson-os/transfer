@@ -95,7 +95,8 @@ Ext.define('GibsonOS.module.transfer.sync.Form', {
             handler: function() {
                 me.getForm().submit({
                     xtype: 'gosFormActionAction',
-                    url: baseDir + 'transfer/syn/save',
+                    url: baseDir + 'transfer/syn',
+                    method: 'POST',
                     success: function(form, action) {
                         GibsonOS.MessageBox.show({
                             title: 'Gespeichert!',

@@ -7,11 +7,11 @@ use GibsonOS\Core\Attribute\CheckPermission;
 use GibsonOS\Core\Attribute\GetMappedModel;
 use GibsonOS\Core\Attribute\GetModel;
 use GibsonOS\Core\Controller\AbstractController;
+use GibsonOS\Core\Enum\Permission;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\Model\SaveError;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Manager\ModelManager;
-use GibsonOS\Core\Model\User\Permission;
 use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\PermissionService;
 use GibsonOS\Core\Service\Response\AjaxResponse;
@@ -24,17 +24,19 @@ use ReflectionException;
 class SessionController extends AbstractController
 {
     /**
+     * @throws JsonException
+     * @throws ReflectionException
      * @throws SelectError
      */
-    #[CheckPermission(Permission::READ)]
-    public function index(
+    #[CheckPermission([Permission::READ])]
+    public function get(
         SessionStore $sessionStore,
         PermissionService $permissionService,
         int $userPermission
     ): AjaxResponse {
         $userId = $this->sessionService->getUserId();
 
-        if ($permissionService->checkPermission(Permission::MANAGE, $userPermission)) {
+        if ($permissionService->checkPermission(Permission::MANAGE->value, $userPermission)) {
             $userId = null;
         }
 
@@ -49,8 +51,8 @@ class SessionController extends AbstractController
      * @throws JsonException
      * @throws ReflectionException
      */
-    #[CheckPermission(Permission::WRITE)]
-    public function save(
+    #[CheckPermission([Permission::WRITE])]
+    public function post(
         ClientFactory $clientFactory,
         CryptService $cryptService,
         PermissionService $permissionService,
@@ -65,8 +67,8 @@ class SessionController extends AbstractController
         $userId = $session->getUserId();
 
         if (
-            ($userId === null && !$permissionService->checkPermission(Permission::MANAGE, $userPermission)) ||
-            ($userId !== null && $userId !== $this->sessionService->getUserId())
+            ($userId === null && !$permissionService->checkPermission(Permission::MANAGE->value, $userPermission))
+            || ($userId !== null && $userId !== $this->sessionService->getUserId())
         ) {
             return $this->returnFailure(sprintf(
                 'Keine Berechtigung um die Session %s zu bearbeiten!',
@@ -99,7 +101,7 @@ class SessionController extends AbstractController
      * @throws ReflectionException
      * @throws SaveError
      */
-    #[CheckPermission(Permission::DELETE)]
+    #[CheckPermission([Permission::DELETE])]
     public function delete(
         PermissionService $permissionService,
         ModelManager $modelManager,
@@ -107,8 +109,8 @@ class SessionController extends AbstractController
         #[GetModel] Session $session
     ): AjaxResponse {
         if (
-            ($session->getUserId() !== $this->sessionService->getUserId()) &&
-            !$permissionService->checkPermission(Permission::MANAGE, $userPermission)
+            ($session->getUserId() !== $this->sessionService->getUserId())
+            && !$permissionService->checkPermission(Permission::MANAGE->value, $userPermission)
         ) {
             return $this->returnFailure(sprintf(
                 'Keine Berechtigung um die Session %s zu löschen!',
