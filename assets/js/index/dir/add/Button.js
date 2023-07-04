@@ -6,8 +6,9 @@ Ext.define('GibsonOS.module.transfer.index.dir.add.Button', {
     iconCls: 'icon16 icon_dir',
     requiredPermission: {
         task: 'index',
-        action: 'addDir',
-        permission: GibsonOS.Permission.WRITE
+        action: 'dir',
+        permission: GibsonOS.Permission.WRITE,
+        method: 'POST'
     },
     handler() {
         this.addFunction(false);

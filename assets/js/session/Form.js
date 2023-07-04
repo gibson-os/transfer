@@ -129,8 +129,9 @@ Ext.define('GibsonOS.module.transfer.session.Form', {
             text: 'Speichern',
             itemId: 'transferSessionFormSaveButton',
             requiredPermission: {
-                action:'save',
-                permission: GibsonOS.Permission.MANAGE + GibsonOS.Permission.WRITE
+                action: '',
+                permission: GibsonOS.Permission.MANAGE + GibsonOS.Permission.WRITE,
+                method: 'POST'
             },
             handler: function() {
                 me.getForm().submit({

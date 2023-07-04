@@ -8,7 +8,8 @@ Ext.define('GibsonOS.module.transfer.index.upload.Button', {
         module: 'transfer',
         task: 'index',
         action: 'upload',
-        permission: GibsonOS.Permission.WRITE
+        permission: GibsonOS.Permission.WRITE,
+        method: 'POST'
     },
     handler() {
         this.uploadFunction(false);

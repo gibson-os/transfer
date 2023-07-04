@@ -6,8 +6,9 @@ Ext.define('GibsonOS.module.transfer.sync.Button', {
     requiredPermission: {
         module: 'transfer',
         task: 'sync',
-        action: 'index',
-        permission: GibsonOS.Permission.READ
+        action: '',
+        permission: GibsonOS.Permission.READ,
+        method: 'GET'
     },
     handler: function() {
         new GibsonOS.module.transfer.sync.Window();

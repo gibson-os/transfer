@@ -9,8 +9,9 @@ GibsonOS.define('GibsonOS.module.transfer.index.contextMenu.item', [{
     text: 'Löschen',
     iconCls: 'icon_system system_delete',
     requiredPermission: {
-        action: 'delete',
-        permission: GibsonOS.Permission.WRITE
+        action: '',
+        permission: GibsonOS.Permission.WRITE,
+        method: 'DELETE'
     },
     handler: function() {
         var button = this;

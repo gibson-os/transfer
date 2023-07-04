@@ -5,8 +5,9 @@ Ext.define('GibsonOS.module.transfer.session.AutoComplete', {
     requiredPermission: {
         module: 'transfer',
         task: 'session',
-        action: 'index',
-        permission: GibsonOS.Permission.READ
+        action: '',
+        permission: GibsonOS.Permission.READ,
+        method: 'GET'
     },
     parameterObject: {
         config: {

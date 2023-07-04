@@ -30,8 +30,9 @@ Ext.define('GibsonOS.module.transfer.index.Panel', {
                 itemId: 'transferIndexBackButton',
                 iconCls: 'icon_system system_back',
                 requiredPermission: {
-                    action:'read',
-                    permission: GibsonOS.Permission.READ
+                    action: '',
+                    permission: GibsonOS.Permission.READ,
+                    method: 'GET'
                 },
                 disabled: true,
                 handler: function() {
@@ -50,8 +51,9 @@ Ext.define('GibsonOS.module.transfer.index.Panel', {
                 itemId: 'transferIndexNextButton',
                 iconCls: 'icon_system system_next',
                 requiredPermission: {
-                    action:'read',
-                    permission: GibsonOS.Permission.READ
+                    action: '',
+                    permission: GibsonOS.Permission.READ,
+                    method: 'GET'
                 },
                 disabled: true,
                 handler: function() {
@@ -70,8 +72,9 @@ Ext.define('GibsonOS.module.transfer.index.Panel', {
                 itemId: 'transferIndexUpButton',
                 iconCls: 'icon_system system_up',
                 requiredPermission: {
-                    action:'read',
-                    permission: GibsonOS.Permission.READ
+                    action: '',
+                    permission: GibsonOS.Permission.READ,
+                    method: 'DELETE'
                 },
                 handler: function() {
                     var panel = this.up('#transferIndexPanel');

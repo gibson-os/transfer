@@ -44,8 +44,9 @@ Ext.define('GibsonOS.module.transfer.sync.Grid', {
         me.tbar = [{
             iconCls: 'icon_system system_add',
             requiredPermission: {
-                action: 'save',
-                permission: GibsonOS.Permission.WRITE
+                action: '',
+                permission: GibsonOS.Permission.WRITE,
+                method: 'POST'
             },
             handler: function() {
                 me.getSelectionModel().select(me.getStore().add({port: 21}));
@@ -55,8 +56,9 @@ Ext.define('GibsonOS.module.transfer.sync.Grid', {
             itemId: 'transferSyncGridDeleteButton',
             disabled: true,
             requiredPermission: {
-                action: 'delete',
-                permission: GibsonOS.Permission.WRITE
+                action: '',
+                permission: GibsonOS.Permission.WRITE,
+                method: 'DELETE'
             },
             handler: function() {
                 var record = me.getSelectionModel().getSelection()[0];

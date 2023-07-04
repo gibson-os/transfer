@@ -7,7 +7,8 @@ Ext.define('GibsonOS.module.transfer.index.download.Button', {
     requiredPermission: {
         task: 'index',
         action: 'download',
-        permission: GibsonOS.Permission.WRITE
+        permission: GibsonOS.Permission.WRITE,
+        method: 'GET'
     },
     handler: function() {
         var menu = this.up('#contextMenu');

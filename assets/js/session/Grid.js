@@ -24,8 +24,9 @@ Ext.define('GibsonOS.module.transfer.session.Grid', {
         this.tbar = [{
             iconCls: 'icon_system system_add',
             requiredPermission: {
-                action: 'save',
-                permission: GibsonOS.Permission.WRITE
+                action: '',
+                permission: GibsonOS.Permission.WRITE,
+                method: 'POST'
             },
             handler: function() {
                 grid.getSelectionModel().select(grid.getStore().add({port: 21}));
@@ -35,8 +36,9 @@ Ext.define('GibsonOS.module.transfer.session.Grid', {
             itemId: 'transferSessionGridDeleteButton',
             disabled: true,
             requiredPermission: {
-                action: 'delete',
-                permission: GibsonOS.Permission.WRITE
+                action: '',
+                permission: GibsonOS.Permission.WRITE,
+                method: 'DELETE'
             },
             handler: function () {
                 var record = grid.getSelectionModel().getSelection()[0];

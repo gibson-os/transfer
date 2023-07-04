@@ -89,8 +89,9 @@ Ext.define('GibsonOS.module.transfer.sync.Form', {
             text: 'Speichern',
             itemId: 'transferSyncFormSaveButton',
             requiredPermission: {
-                action:'save',
-                permission: GibsonOS.Permission.MANAGE + GibsonOS.Permission.WRITE
+                action: '',
+                permission: GibsonOS.Permission.MANAGE + GibsonOS.Permission.WRITE,
+                method: 'POST'
             },
             handler: function() {
                 me.getForm().submit({
