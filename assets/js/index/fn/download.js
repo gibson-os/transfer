@@ -16,6 +16,7 @@ GibsonOS.define('GibsonOS.module.transfer.index.fn.download', function(dir, file
 
     GibsonOS.Ajax.request({
         url: baseDir + 'transfer/index/download',
+        method: 'GET',
         timeout: 36000000,
         params: params,
         success: function(response) {

@@ -135,7 +135,8 @@ Ext.define('GibsonOS.module.transfer.session.Form', {
             handler: function() {
                 me.getForm().submit({
                     xtype: 'gosFormActionAction',
-                    url: baseDir + 'transfer/session/save',
+                    url: baseDir + 'transfer/session',
+                    method: 'POST',
                     params: {
                         // @todo protocol hat falsches model und deswegen ist value immer null
                         clientClass: me.getForm().findField('protocol').valueModels[0].raw.className

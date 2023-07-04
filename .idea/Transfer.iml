@@ -5,8 +5,8 @@
       <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" packagePrefix="GibsonOS\Module\Transfer\" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/tests/functional" isTestSource="true" packagePrefix="GibsonOS\Test\Functional\Transfer\" />
-      <sourceFolder url="file://$MODULE_DIR$/tests/unit" isTestSource="true" packagePrefix="GibsonOS\Test\Unit\Transfer\" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/functional" isTestSource="false" packagePrefix="GibsonOS\Test\Functional\Transfer\" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/unit" isTestSource="false" packagePrefix="GibsonOS\Test\Unit\Transfer\" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/psr/http-client" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/dom-crawler" />
@@ -114,6 +114,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/finder" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/nikic/php-parser" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/event-dispatcher-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/phpmailer/phpmailer" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

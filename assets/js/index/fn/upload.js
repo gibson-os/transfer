@@ -17,6 +17,7 @@ GibsonOS.define('GibsonOS.module.transfer.index.fn.upload', function(dir, files,
 
     GibsonOS.Ajax.request({
         url: baseDir + 'transfer/index/upload',
+        method: 'POST',
         timeout: 36000000,
         params: params,
         success: function(response) {

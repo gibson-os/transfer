@@ -3,7 +3,8 @@ Ext.define('GibsonOS.module.transfer.index.store.View', {
     alias: ['store.gosModuleTransferIndexContainerStore'],
     proxy: {
         type: 'gosDataProxyAjax',
-        url: baseDir + 'transfer/index/read'
+        url: baseDir + 'transfer/index',
+        method: 'GET'
     },
     model: 'GibsonOS.module.transfer.index.model.View'
 });

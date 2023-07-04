@@ -19,7 +19,7 @@ class QueueRepository extends AbstractRepository
 
     public function countByStatus(string $status): int
     {
-        $count = $this->getAggregate('COUNT(`id`)', '`status`=?', [$status], Queue::class);
+        $count = $this->getAggregate('COUNT(`id`)', Queue::class, '`status`=?', [$status]);
 
         return empty($count) ? 0 : $count[0];
     }
@@ -41,9 +41,9 @@ class QueueRepository extends AbstractRepository
 
         $count = $this->getAggregate(
             'COUNT(`id`)',
+            Queue::class,
             implode(' AND ', $where),
             $whereParameters,
-            Queue::class
         );
 
         return !empty($count) && $count[0] > 0;

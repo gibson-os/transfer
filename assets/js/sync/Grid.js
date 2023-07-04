@@ -69,7 +69,8 @@ Ext.define('GibsonOS.module.transfer.sync.Grid', {
                         text: 'Ja',
                         handler: function() {
                             GibsonOS.Ajax.request({
-                                url: baseDir + 'transfer/sync/delete',
+                                url: baseDir + 'transfer/sync',
+                                method: 'DELETE',
                                 params:  {
                                     id: record.get('id')
                                 },
