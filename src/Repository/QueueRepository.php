@@ -6,24 +6,43 @@ namespace GibsonOS\Module\Transfer\Repository;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Repository\AbstractRepository;
 use GibsonOS\Module\Transfer\Model\Queue;
+use JsonException;
+use MDO\Enum\OrderDirection;
+use MDO\Exception\ClientException;
+use MDO\Exception\RecordException;
+use ReflectionException;
 
 class QueueRepository extends AbstractRepository
 {
     /**
      * @throws SelectError
+     * @throws JsonException
+     * @throws ClientException
+     * @throws RecordException
+     * @throws ReflectionException
      */
     public function getNextByStatus(string $status): Queue
     {
-        return $this->fetchOne('`status`=?', [$status], Queue::class, '`added`');
+        return $this->fetchOne('`status`=?', [$status], Queue::class, ['`added`' => OrderDirection::ASC]);
     }
 
+    /**
+     * @throws ClientException
+     * @throws RecordException
+     * @throws SelectError
+     */
     public function countByStatus(string $status): int
     {
-        $count = $this->getAggregate('COUNT(`id`)', Queue::class, '`status`=?', [$status]);
+        $aggregations = $this->getAggregations(['count' => 'COUNT(`id`)'], Queue::class, '`status`=?', [$status]);
 
-        return empty($count) ? 0 : $count[0];
+        return (int) $aggregations->get('count')->getValue();
     }
 
+    /**
+     * @throws ClientException
+     * @throws RecordException
+     * @throws SelectError
+     */
     public function queueExists(Queue $queue): bool
     {
         $where = ['`status`=?'];
@@ -39,14 +58,15 @@ class QueueRepository extends AbstractRepository
         $this->addWhere($queue, 'remote_path', 'getRemotePath', $where, $whereParameters);
         $this->addWhere($queue, 'direction', 'getDirection', $where, $whereParameters);
 
-        $count = $this->getAggregate(
-            'COUNT(`id`)',
+        $aggregations = $this->getAggregations(
+            ['count' => 'COUNT(`id`)'],
             Queue::class,
             implode(' AND ', $where),
             $whereParameters,
         );
+        $count = $aggregations->get('count')->getValue();
 
-        return !empty($count) && $count[0] > 0;
+        return ($count ?? 0) > 0;
     }
 
     private function addWhere(Queue $queue, string $fieldName, string $getterName, array &$where, array &$whereParameters): void

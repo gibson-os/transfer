@@ -36,7 +36,8 @@ class IndexController extends AbstractController
         DirStore $dirStore,
         ClientService $clientService,
         ClientCryptService $clientCryptService,
-        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
+        Session $session
     ): AjaxResponse {
         $client = $clientService->connect($session, $this->sessionService->getUserId());
         $dir = $session->getRemotePath();
@@ -90,7 +91,8 @@ class IndexController extends AbstractController
     public function getList(
         ClientService $clientService,
         DirListStore $dirListStore,
-        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
+        Session $session,
         string $node = null
     ): AjaxResponse {
         $client = $clientService->connect($session, $this->sessionService->getUserId());
@@ -128,7 +130,8 @@ class IndexController extends AbstractController
         QueueService $queueService,
         string $localPath,
         string $dir,
-        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
+        Session $session,
         array $files = null,
         bool $overwriteAll = false,
         array $overwrite = [],
@@ -173,7 +176,8 @@ class IndexController extends AbstractController
         QueueService $queueService,
         string $remotePath,
         string $dir,
-        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'localPath' => 'dir'])] Session $session,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'localPath' => 'dir'])]
+        Session $session,
         array $files = null,
         bool $overwriteAll = false,
         array $overwrite = [],
@@ -236,7 +240,8 @@ class IndexController extends AbstractController
         ClientCryptService $nameCryptService,
         string $dir,
         string $dirname,
-        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
+        Session $session,
         bool $crypt = false,
     ): AjaxResponse {
         $client = $clientService->connect($session, $this->sessionService->getUserId());
@@ -259,7 +264,8 @@ class IndexController extends AbstractController
     public function delete(
         ClientService $clientService,
         string $dir,
-        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])] Session $session,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
+        Session $session,
         array $files = null
     ): AjaxResponse {
         $client = $clientService->connect($session, $this->sessionService->getUserId());

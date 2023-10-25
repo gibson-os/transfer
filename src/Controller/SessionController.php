@@ -58,7 +58,8 @@ class SessionController extends AbstractController
         PermissionService $permissionService,
         ModelManager $modelManager,
         int $userPermission,
-        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'protocol' => 'clientClass'])] Session $session,
+        #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'protocol' => 'clientClass'])]
+        Session $session,
         string $user = null,
         string $password = null,
         int $port = null,
@@ -106,7 +107,8 @@ class SessionController extends AbstractController
         PermissionService $permissionService,
         ModelManager $modelManager,
         int $userPermission,
-        #[GetModel] Session $session
+        #[GetModel]
+        Session $session
     ): AjaxResponse {
         if (
             ($session->getUserId() !== $this->sessionService->getUserId())

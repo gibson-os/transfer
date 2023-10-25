@@ -16,6 +16,7 @@ use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Service\DirService;
 use GibsonOS\Core\Service\FileService;
+use GibsonOS\Core\Wrapper\ModelWrapper;
 use GibsonOS\Module\Transfer\Client\ClientInterface;
 use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
@@ -29,14 +30,15 @@ use ReflectionException;
 class QueueService
 {
     public function __construct(
-        private DirService $dirService,
-        private FileService $fileService,
-        private CryptService $cryptService,
-        private ClientCryptService $clientCryptService,
-        private DateTimeService $dateTimeService,
-        private ClientService $clientService,
-        private QueueRepository $queueRepository,
-        private ModelManager $modelManager
+        private readonly DirService $dirService,
+        private readonly FileService $fileService,
+        private readonly CryptService $cryptService,
+        private readonly ClientCryptService $clientCryptService,
+        private readonly DateTimeService $dateTimeService,
+        private readonly ClientService $clientService,
+        private readonly QueueRepository $queueRepository,
+        private readonly ModelManager $modelManager,
+        private readonly ModelWrapper $modelWrapper,
     ) {
     }
 
@@ -106,7 +108,7 @@ class QueueService
             }
 
             $overwriteItem = $overwriteAll === true || array_search($localItemPath, $overwrite) !== false;
-            $queue = (new Queue())
+            $queue = (new Queue($this->modelWrapper))
                 ->setLocalPath($localItemPath)
                 ->setRemotePath($remoteItemPath)
                 ->setSize($item->getSize())
@@ -209,7 +211,7 @@ class QueueService
             }
 
             $overwriteItem = $overwriteAll === true || array_search($decryptedRemoteItemPath, $overwrite) !== false;
-            $queue = (new Queue())
+            $queue = (new Queue($this->modelWrapper))
                 ->setLocalPath($item)
                 ->setRemotePath($remoteItemPath)
                 ->setSize(filesize($item))
@@ -270,7 +272,7 @@ class QueueService
                     throw new ClientException('Protocol, url or port not set!');
                 }
 
-                $session = (new Session())
+                $session = (new Session($this->modelWrapper))
                     ->setProtocol($protocol)
                     ->setUrl($url)
                     ->setPort($port)
