@@ -7,6 +7,7 @@ use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Store\AbstractDatabaseStore;
 use GibsonOS\Core\Wrapper\DatabaseStoreWrapper;
 use GibsonOS\Module\Transfer\Model\Session;
+use MDO\Enum\OrderDirection;
 
 class SessionStore extends AbstractDatabaseStore
 {
@@ -37,9 +38,9 @@ class SessionStore extends AbstractDatabaseStore
         $this->addWhere($userWhere, $userParameters);
     }
 
-    protected function getDefaultOrder(): string
+    protected function getDefaultOrder(): array
     {
-        return '`name`';
+        return ['`name`' => OrderDirection::ASC];
     }
 
     public function getList(): iterable
