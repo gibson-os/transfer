@@ -26,7 +26,7 @@ class SftpClient implements ClientInterface
         private DateTimeService $dateTimeService,
         private ClientCryptService $clientCryptService,
         private FileService $fileService,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -214,19 +214,19 @@ class SftpClient implements ClientInterface
                     (bool) ($mode & 0x0100),
                     (bool) ($mode & 0x0080),
                     ($mode & 0x0040) && !($mode & 0x0800),
-                    (string) $stats['uid']
+                    (string) $stats['uid'],
                 ),
                 new ListItem\Permission(
                     (bool) ($mode & 0x0020),
                     (bool) ($mode & 0x0010),
                     ($mode & 0x0008) && !($mode & 0x0400),
-                    (string) $stats['gid']
+                    (string) $stats['gid'],
                 ),
                 new ListItem\Permission(
                     (bool) ($mode & 0x0004),
                     (bool) ($mode & 0x0002),
                     ($mode & 0x0001) && !($mode & 0x0200),
-                )
+                ),
             );
         }
 

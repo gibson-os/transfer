@@ -32,7 +32,7 @@ class SessionController extends AbstractController
     public function get(
         SessionStore $sessionStore,
         PermissionService $permissionService,
-        int $userPermission
+        int $userPermission,
     ): AjaxResponse {
         $userId = $this->sessionService->getUserId();
 
@@ -63,7 +63,7 @@ class SessionController extends AbstractController
         string $user = null,
         string $password = null,
         int $port = null,
-        bool $onlyForThisUser = false
+        bool $onlyForThisUser = false,
     ): AjaxResponse {
         $userId = $session->getUserId();
 
@@ -73,7 +73,7 @@ class SessionController extends AbstractController
         ) {
             return $this->returnFailure(sprintf(
                 'Keine Berechtigung um die Session %s zu bearbeiten!',
-                $session->getName()
+                $session->getName(),
             ));
         }
 
@@ -108,7 +108,7 @@ class SessionController extends AbstractController
         ModelManager $modelManager,
         int $userPermission,
         #[GetModel]
-        Session $session
+        Session $session,
     ): AjaxResponse {
         if (
             ($session->getUserId() !== $this->sessionService->getUserId())
@@ -116,7 +116,7 @@ class SessionController extends AbstractController
         ) {
             return $this->returnFailure(sprintf(
                 'Keine Berechtigung um die Session %s zu löschen!',
-                $session->getName()
+                $session->getName(),
             ));
         }
 

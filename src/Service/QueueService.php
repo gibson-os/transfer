@@ -65,7 +65,7 @@ class QueueService
         string $address = null,
         int $port = null,
         string $user = null,
-        string $password = null
+        string $password = null,
     ): void {
         ini_set('max_execution_time', '0');
         $localPath = $this->dirService->addEndSlash($localPath);
@@ -101,7 +101,7 @@ class QueueService
                     $address,
                     $port,
                     $user,
-                    $password
+                    $password,
                 );
 
                 continue;
@@ -164,7 +164,7 @@ class QueueService
         string $address = null,
         int $port = null,
         string $user = null,
-        string $password = null
+        string $password = null,
     ): void {
         ini_set('max_execution_time', '0');
         $remotePath = $this->dirService->addEndSlash($remotePath, '/');
@@ -204,7 +204,7 @@ class QueueService
                     $address,
                     $port,
                     $user,
-                    $password
+                    $password,
                 );
 
                 continue;
@@ -257,7 +257,7 @@ class QueueService
         $this->modelManager->save(
             $queue
                 ->setStatus(Queue::STATUS_ACTIVE)
-                ->setStart($this->dateTimeService->get())
+                ->setStart($this->dateTimeService->get()),
         );
 
         try {
@@ -287,7 +287,7 @@ class QueueService
                 $queue
                     ->setStatus(Queue::STATUS_ERROR)
                     ->setMessage('Connection error!')
-                    ->setEnd($this->dateTimeService->get())
+                    ->setEnd($this->dateTimeService->get()),
             );
 
             throw $exception;

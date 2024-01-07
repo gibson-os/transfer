@@ -37,7 +37,7 @@ class IndexController extends AbstractController
         ClientService $clientService,
         ClientCryptService $clientCryptService,
         #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
-        Session $session
+        Session $session,
     ): AjaxResponse {
         $client = $clientService->connect($session, $this->sessionService->getUserId());
         $dir = $session->getRemotePath();
@@ -93,7 +93,7 @@ class IndexController extends AbstractController
         DirListStore $dirListStore,
         #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
         Session $session,
-        string $node = null
+        string $node = null,
     ): AjaxResponse {
         $client = $clientService->connect($session, $this->sessionService->getUserId());
         $loadParents = false;
@@ -154,7 +154,7 @@ class IndexController extends AbstractController
             $session->getUrl(),
             $session->getPort(),
             $session->getRemoteUser(),
-            $session->getRemotePassword()
+            $session->getRemotePassword(),
         );
         $client->disconnect();
 
@@ -183,7 +183,7 @@ class IndexController extends AbstractController
         array $overwrite = [],
         bool $ignoreAll = false,
         array $ignore = [],
-        bool $crypt = false
+        bool $crypt = false,
     ): AjaxResponse {
         $client = $clientService->connect($session, $this->sessionService->getUserId());
 
@@ -202,7 +202,7 @@ class IndexController extends AbstractController
             $session->getUrl(),
             $session->getPort(),
             $session->getRemoteUser(),
-            $session->getRemotePassword()
+            $session->getRemotePassword(),
         );
         $client->disconnect();
 
@@ -220,7 +220,7 @@ class IndexController extends AbstractController
         string $type,
         int $autoRefresh,
         int $limit = 0,
-        int $start = 0
+        int $start = 0,
     ): AjaxResponse {
         $transferStore
             ->setType($type)
@@ -249,7 +249,7 @@ class IndexController extends AbstractController
             $client,
             $dir,
             $crypt ? $nameCryptService->encryptDirName($dirname) : $dirname,
-            $dirname
+            $dirname,
         );
         $client->disconnect();
 
@@ -266,7 +266,7 @@ class IndexController extends AbstractController
         string $dir,
         #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
         Session $session,
-        array $files = null
+        array $files = null,
     ): AjaxResponse {
         $client = $clientService->connect($session, $this->sessionService->getUserId());
         $clientService->delete($client, $dir, $files);

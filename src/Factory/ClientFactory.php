@@ -26,7 +26,7 @@ class ClientFactory
             throw new FactoryError(sprintf(
                 'Client %s is not an interface of %s',
                 $clientClassName,
-                ClientInterface::class
+                ClientInterface::class,
             ));
         }
 

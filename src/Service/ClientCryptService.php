@@ -23,7 +23,7 @@ class ClientCryptService
         return str_replace(
             '/',
             '_',
-            base64_encode(gzcompress($this->cryptService->encrypt($dirName), 9) ?: '')
+            base64_encode(gzcompress($this->cryptService->encrypt($dirName), 9) ?: ''),
         ) . self::DIR_EXTENSION;
     }
 
@@ -32,7 +32,7 @@ class ClientCryptService
         return str_replace(
             '/',
             '_',
-            base64_encode(gzcompress($this->cryptService->encrypt($fileName), 9) ?: '')
+            base64_encode(gzcompress($this->cryptService->encrypt($fileName), 9) ?: ''),
         ) . self::FILE_EXTENSION;
     }
 
@@ -46,7 +46,7 @@ class ClientCryptService
         $strReplace = str_replace('_', '/', $dirName);
 
         return $this->cryptService->decrypt(
-            gzuncompress(base64_decode($strReplace) ?: '')
+            gzuncompress(base64_decode($strReplace) ?: ''),
         );
     }
 
@@ -60,7 +60,7 @@ class ClientCryptService
         $strReplace = str_replace('_', '/', $dirName);
 
         return $this->cryptService->decrypt(
-            gzuncompress(base64_decode($strReplace) ?: '')
+            gzuncompress(base64_decode($strReplace) ?: ''),
         );
     }
 

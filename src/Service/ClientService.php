@@ -25,7 +25,7 @@ class ClientService
         private FileService $fileService,
         private DateTimeService $dateTimeService,
         private SessionRepository $sessionRepository,
-        private ClientFactory $clientFactory
+        private ClientFactory $clientFactory,
     ) {
     }
 
@@ -78,7 +78,7 @@ class ClientService
             $dir,
             $this->dateTimeService->get(),
             0,
-            ListItem::TYPE_DIR
+            ListItem::TYPE_DIR,
         );
     }
 
@@ -179,7 +179,7 @@ class ClientService
             $session->getUrl(),
             $user === null ? null : $this->cryptService->decrypt($user),
             $password === null ? null : $this->cryptService->decrypt($password),
-            $session->getPort()
+            $session->getPort(),
         );
 
         return $client;

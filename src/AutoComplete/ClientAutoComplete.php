@@ -23,7 +23,7 @@ class ClientAutoComplete implements AutoCompleteInterface
     {
         $files = $this->dirService->getFiles(
             realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR .
-            '..' . DIRECTORY_SEPARATOR . 'Client' . DIRECTORY_SEPARATOR
+            '..' . DIRECTORY_SEPARATOR . 'Client' . DIRECTORY_SEPARATOR,
         );
         $namespace = 'GibsonOS\\Module\\Transfer\\Client\\';
         $clients = [];

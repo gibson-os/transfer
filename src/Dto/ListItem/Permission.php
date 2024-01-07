@@ -11,7 +11,7 @@ class Permission implements JsonSerializable
         private bool $read,
         private bool $write,
         private bool $execute,
-        private ?string $name = null
+        private ?string $name = null,
     ) {
     }
 

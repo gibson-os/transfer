@@ -41,7 +41,7 @@ class SessionRepository extends AbstractRepository
         return $this->fetchAll(
             '`name` LIKE ? AND (' . $userWhere . ')',
             $whereParameters,
-            Session::class
+            Session::class,
         );
     }
 }

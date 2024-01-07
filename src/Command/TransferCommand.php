@@ -24,7 +24,7 @@ class TransferCommand extends AbstractCommand
     public function __construct(
         LoggerInterface $logger,
         private readonly QueueRepository $queueRepository,
-        private readonly QueueService $queueService
+        private readonly QueueService $queueService,
     ) {
         parent::__construct($logger);
     }
