@@ -5,7 +5,7 @@ namespace GibsonOS\Module\Transfer\Client;
 
 class WebDavClient implements ClientInterface
 {
-    public function connect(string $address, string $user = null, string $password = null, int $port = null): void
+    public function connect(string $address, ?string $user = null, ?string $password = null, ?int $port = null): void
     {
         // TODO: Implement connect() method.
     }

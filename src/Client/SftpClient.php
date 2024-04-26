@@ -30,7 +30,7 @@ class SftpClient implements ClientInterface
     ) {
     }
 
-    public function connect(string $address, string $user = null, string $password = null, int $port = null): void
+    public function connect(string $address, ?string $user = null, ?string $password = null, ?int $port = null): void
     {
         if ($this->connection !== null) {
             throw new ClientException('SSH2 already connected!');

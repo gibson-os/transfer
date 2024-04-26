@@ -58,7 +58,7 @@ class ClientService
     /**
      * @throws ClientException
      */
-    public function createDir(ClientInterface $client, string $dir, string $name, string $decryptedName = null): ListItem
+    public function createDir(ClientInterface $client, string $dir, string $name, ?string $decryptedName = null): ListItem
     {
         $previousDir = $this->dirService->getDirName($dir, '/');
 
@@ -85,7 +85,7 @@ class ClientService
     /**
      * @throws ClientException
      */
-    public function delete(ClientInterface $client, string $dir, array $files = null): void
+    public function delete(ClientInterface $client, string $dir, ?array $files = null): void
     {
         $dir = $this->dirService->addEndSlash($dir, '/');
 
@@ -166,7 +166,7 @@ class ClientService
      * @throws ClientException
      * @throws FactoryError
      */
-    public function connect(Session $session, int $userId = null): ClientInterface
+    public function connect(Session $session, ?int $userId = null): ClientInterface
     {
         if ($session->getUserId() !== null && $session->getUserId() !== $userId) {
             throw new ClientException('Session not allowed for user!');

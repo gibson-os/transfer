@@ -60,9 +60,9 @@ class SessionController extends AbstractController
         int $userPermission,
         #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'protocol' => 'clientClass'])]
         Session $session,
-        string $user = null,
-        string $password = null,
-        int $port = null,
+        ?string $user = null,
+        ?string $password = null,
+        ?int $port = null,
         bool $onlyForThisUser = false,
     ): AjaxResponse {
         $userId = $session->getUserId();

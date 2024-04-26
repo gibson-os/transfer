@@ -11,7 +11,7 @@ interface ClientInterface
     /**
      * @throws ClientException
      */
-    public function connect(string $address, string $user = null, string $password = null, int $port = null): void;
+    public function connect(string $address, ?string $user = null, ?string $password = null, ?int $port = null): void;
 
     /**
      * @throws ClientException

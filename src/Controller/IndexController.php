@@ -93,7 +93,7 @@ class IndexController extends AbstractController
         DirListStore $dirListStore,
         #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
         Session $session,
-        string $node = null,
+        ?string $node = null,
     ): AjaxResponse {
         $client = $clientService->connect($session, $this->sessionService->getUserId());
         $loadParents = false;
@@ -132,7 +132,7 @@ class IndexController extends AbstractController
         string $dir,
         #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
         Session $session,
-        array $files = null,
+        ?array $files = null,
         bool $overwriteAll = false,
         array $overwrite = [],
         bool $ignoreAll = false,
@@ -178,7 +178,7 @@ class IndexController extends AbstractController
         string $dir,
         #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'localPath' => 'dir'])]
         Session $session,
-        array $files = null,
+        ?array $files = null,
         bool $overwriteAll = false,
         array $overwrite = [],
         bool $ignoreAll = false,
@@ -266,7 +266,7 @@ class IndexController extends AbstractController
         string $dir,
         #[GetMappedModel(mapping: ['remoteUser' => 'user', 'remotePassword' => 'password', 'remotePath' => 'dir'])]
         Session $session,
-        array $files = null,
+        ?array $files = null,
     ): AjaxResponse {
         $client = $clientService->connect($session, $this->sessionService->getUserId());
         $clientService->delete($client, $dir, $files);

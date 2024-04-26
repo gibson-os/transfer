@@ -12,7 +12,7 @@ class SessionRepository extends AbstractRepository
     /**
      * @throws SelectError
      */
-    public function getById(int $id, int $userId = null): Session
+    public function getById(int $id, ?int $userId = null): Session
     {
         $userWhere = '';
         $whereParameters = [$id];
@@ -28,7 +28,7 @@ class SessionRepository extends AbstractRepository
     /**
      * @throws SelectError
      */
-    public function findByName(string $name, int $userId = null): array
+    public function findByName(string $name, ?int $userId = null): array
     {
         $userWhere = '`user_id` IS NULL';
         $whereParameters = [$name . '%'];
