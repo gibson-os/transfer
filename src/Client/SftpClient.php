@@ -178,7 +178,7 @@ class SftpClient implements ClientInterface
             throw new ClientException('SSH2 not connected!');
         }
 
-        if (empty($dir)) {
+        if ($dir === '') {
             $dir = '/';
         }
 
@@ -191,10 +191,7 @@ class SftpClient implements ClientInterface
         $list = [];
 
         while ($item = readdir($dirResource)) {
-            if (
-                $item == '.'
-                || $item == '..'
-            ) {
+            if ($item === '.' || $item === '..') {
                 continue;
             }
 

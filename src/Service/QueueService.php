@@ -107,7 +107,7 @@ class QueueService
                 continue;
             }
 
-            $overwriteItem = $overwriteAll === true || array_search($localItemPath, $overwrite) !== false;
+            $overwriteItem = $overwriteAll || in_array($localItemPath, $overwrite);
             $queue = (new Queue($this->modelWrapper))
                 ->setLocalPath($localItemPath)
                 ->setRemotePath($remoteItemPath)
@@ -128,7 +128,7 @@ class QueueService
             }
 
             if (!$overwriteItem && $this->fileService->exists($localItemPath)) {
-                if ($ignoreAll === true || array_search($localItemPath, $ignore) !== false) {
+                if ($ignoreAll || in_array($localItemPath, $ignore)) {
                     continue;
                 }
 
@@ -210,7 +210,7 @@ class QueueService
                 continue;
             }
 
-            $overwriteItem = $overwriteAll === true || array_search($decryptedRemoteItemPath, $overwrite) !== false;
+            $overwriteItem = $overwriteAll || in_array($decryptedRemoteItemPath, $overwrite);
             $queue = (new Queue($this->modelWrapper))
                 ->setLocalPath($item)
                 ->setRemotePath($remoteItemPath)
@@ -231,7 +231,7 @@ class QueueService
             }
 
             if (!$overwriteItem && $client->fileExists($remoteItemPath)) {
-                if ($ignoreAll === true || array_search($decryptedRemoteItemPath, $ignore) !== false) {
+                if ($ignoreAll || in_array($decryptedRemoteItemPath, $ignore)) {
                     continue;
                 }
 
@@ -263,7 +263,7 @@ class QueueService
         try {
             $session = $queue->getSession();
 
-            if ($session === null) {
+            if (!$session instanceof Session) {
                 $protocol = $queue->getProtocol();
                 $url = $queue->getUrl();
                 $port = $queue->getPort();

@@ -15,7 +15,6 @@ use GibsonOS\Module\Transfer\Dto\ListItem;
 use GibsonOS\Module\Transfer\Exception\ClientException;
 use GibsonOS\Module\Transfer\Factory\ClientFactory;
 use GibsonOS\Module\Transfer\Model\Session;
-use GibsonOS\Module\Transfer\Repository\SessionRepository;
 
 class ClientService
 {
@@ -24,7 +23,6 @@ class ClientService
         private DirService $dirService,
         private FileService $fileService,
         private DateTimeService $dateTimeService,
-        private SessionRepository $sessionRepository,
         private ClientFactory $clientFactory,
     ) {
     }

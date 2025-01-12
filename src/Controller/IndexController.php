@@ -101,7 +101,7 @@ class IndexController extends AbstractController
 
         if ($node === 'root') {
             $loadParents = true;
-        } elseif (!empty($node)) {
+        } elseif ($node !== null && $node !== '') {
             $dir = $node;
         }
 
