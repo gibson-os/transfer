@@ -9,6 +9,9 @@ use GibsonOS\Core\Wrapper\DatabaseStoreWrapper;
 use GibsonOS\Module\Transfer\Model\Session;
 use MDO\Enum\OrderDirection;
 
+/**
+ * @extends AbstractDatabaseStore<Session>
+ */
 class SessionStore extends AbstractDatabaseStore
 {
     private ?int $userId = null;

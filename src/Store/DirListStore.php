@@ -26,7 +26,7 @@ class DirListStore extends AbstractStore
      */
     public function getList(): iterable
     {
-        $list = [...$this->getDirs($this->dir)];
+        $list = iterator_to_array($this->getDirs($this->dir));
 
         if ($this->loadParents) {
             $childDir = $this->dir;
@@ -48,7 +48,8 @@ class DirListStore extends AbstractStore
 
                 $list = $parentList;
                 $childDir = $parentDir;
-                unset($dirs[count($dirs) - 1]);
+                $dirCount = count($dirs) - 1;
+                unset($dirs[max($dirCount, 0)]);
             }
         }
 

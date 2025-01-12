@@ -6,6 +6,9 @@ namespace GibsonOS\Module\Transfer\Store;
 use GibsonOS\Core\Store\AbstractDatabaseStore;
 use GibsonOS\Module\Transfer\Model\Queue;
 
+/**
+ * @extends AbstractDatabaseStore<Queue>
+ */
 class TransferStore extends AbstractDatabaseStore
 {
     private const TYPE_ACTIVE = 'active';
